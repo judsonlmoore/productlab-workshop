@@ -45,7 +45,7 @@ A standardized pricing breakdown UI that shows exactly what an entertainer's quo
 - [P0] When venue creates a request, system pre-fills equipment_provided field based on venue's profile/historical data, creating initial transparency for entertainer
 - [P0] Venue can edit duration_hours and see how that affects budget expectations before sending request
 - [P1] Venue sees example pricing scenarios (e.g., "2-hour set with your equipment: €400-600" vs. "4-hour set with our PA: €700-900")
-- [P1] System shows entertainer response rate and average response time to set venue expectations
+- [P1] System shows entertainer response rate and median response time to set venue expectations
 
 ### Journey 2: Entertainer reviews incoming request
 - [P0] Entertainer can see request with clearly stated: venue budget range, performance duration expected, equipment venue is providing, performance context/details
@@ -77,6 +77,8 @@ A standardized pricing breakdown UI that shows exactly what an entertainer's quo
 
 **Source:** _initial_context-gigiii/data_model.md
 
+**Complete runtime contract:** `schemas/dataset_contract.md` is authoritative for supporting records, field types, events, metadata, and nullability. The fields below are the visible request summary; the runtime contract also supplies profile content and analytics inputs.
+
 **Required fields:**
 - `budget_min` (number) — Minimum budget (EUR)
 - `budget_max` (number) — Maximum budget (EUR)
@@ -90,6 +92,8 @@ A standardized pricing breakdown UI that shows exactly what an entertainer's quo
 - `event_date` (date) — Requested performance date
 
 **Default State & Filters:**
+The Event type filter defaults to All and applies to profiles, requests, comparison, and Pricing insights; its values come from metadata. Entertainer search applies only to the directory. Booking venue selects form context, not an analytics filter. Switching views retains the Event type filter and does not fetch again.
+
 On entertainer profile page, pricing breakdown is always visible (not hidden behind interaction). When venue creates a request, `equipment_provided` defaults to venue's profile setting or "Unclear" if not set. `duration_hours` defaults to entertainer's stated "typical performance duration" but is editable by venue.
 
 ## View Spec
@@ -98,7 +102,7 @@ On entertainer profile page, pricing breakdown is always visible (not hidden beh
 This feature adds pricing clarity elements to two existing views: (1) Entertainer Profile page (where venues make the "send request" decision), and (2) Request Detail page (where entertainers review incoming requests). The primary axis is **informational hierarchy** — pricing information is surfaced at the decision point, not buried in secondary tabs.
 
 **Layout — Entertainer Profile (Venue perspective):**
-Entertainer profile page displays standard profile content (photos, bio, reviews) with a prominent **Pricing & Booking Details** section positioned immediately before the "Send Request" CTA. This section is a contained card with clear visual hierarchy:
+Entertainer profile page displays standard profile content (initials avatar, bio, sample reviews) with a prominent **Pricing & Booking Details** section positioned immediately before the "Send Request" CTA. This section is a contained card with clear visual hierarchy:
 
 - Top line: Base rate (e.g., "€400-600 per performance")
 - Second line: Typical duration (e.g., "3-hour sets")
@@ -107,10 +111,10 @@ Entertainer profile page displays standard profile content (photos, bio, reviews
   - Right: "What you provide" (e.g., "Stage space, power outlet")
 - Bottom: Example scenarios in collapsible accordion (e.g., "2-hour set with your equipment: €300-450")
 
-This card fits within one viewport section (no scrolling required to see all pricing info before CTA).
+On desktop (at least 1024×768), the primary pricing summary and CTA fit without scrolling. On phones, stack details with vertical scrolling, keep the booking action sticky and visible, and prevent horizontal page overflow. Bios, reviews, examples, and booking notes are expandable supporting content.
 
 **Priority 1 — The signal:**
-The critical data condition is: **Does this entertainer's pricing structure match my budget and equipment situation?** Venues must immediately see whether the entertainer provides equipment or requires the venue to provide it, because this is the primary blocker mentioned in signals. Visual treatment: Equipment requirements are shown with clear iconography and color coding (green = included, yellow = venue provides, red = not available). If `equipment_provided` is "Unclear", a warning badge appears: "Equipment details needed—clarify before booking."
+The critical data condition is: **Does this entertainer's pricing structure match my budget and equipment situation?** Venues must immediately see whether the entertainer provides equipment or requires the venue to provide it, because this is the primary blocker mentioned in signals. Visual treatment: Equipment requirements are shown with clear iconography and color coding (green = included, amber = venue provides or needs clarification, red = not available). If `equipment_provided` is "Unclear", a warning badge appears: "Equipment details needed—clarify before booking."
 
 **Priority 2 — The context:**
 The pricing breakdown shows:
@@ -123,12 +127,12 @@ Grouping: Information is grouped by "What you pay" vs. "What you get" vs. "What 
 
 **Priority 3 — Supporting data:**
 - Example pricing scenarios (shown in expandable section below the primary pricing card)
-- Entertainer's response rate and average response time (small text below Send Request button)
-- Link to entertainer's full terms/policies (if they have them)
+- Entertainer's response rate and median response time (small text below Send Request button)
+- Expandable booking notes from the entertainer profile (local sample content)
 
 **KPI definitions:**
-- **Response rate:** (# of requests entertainer responded to / # of requests entertainer received) over last 90 days
-- **Average response time:** Median time from request `sent_at` to first entertainer action (`status` change from Sent to Viewed or In Discussion) over last 90 days
+- **Response rate:** Number of received requests with an explicit entertainer response / number of received requests, using sent_at in the inclusive last 90 days; drafts are excluded.
+- **Median response time:** Median elapsed hours from sent_at to the first explicit entertainer response for received requests sent in the inclusive last 90 days; unanswered requests are excluded.
 
 **Empty State:**
 If entertainer has not filled in pricing breakdown fields (base rate, equipment, duration), show placeholder message: "This entertainer hasn't added pricing details yet. Message them to discuss rates." The Send Request button remains enabled but shows a warning icon.
@@ -145,7 +149,7 @@ When entertainer opens a request, the Request Detail page shows all request fiel
 Below this section: Venue profile summary (venue size, typical events, past bookings if any), and action buttons (Accept, Decline, Request Clarification).
 
 **Priority 1 — The signal:**
-The critical data condition is: **Does this request match my pricing structure and equipment requirements?** Entertainers need to immediately see if the venue's budget and equipment situation align with what they typically charge. Visual treatment: System compares request parameters (budget range, duration, equipment) to entertainer's stated pricing profile and shows a match indicator: "✓ Matches your 3-hour standard rate" (green) or "⚠ Budget below your typical range for this duration" (yellow) or "❌ Equipment mismatch—you require Full PA, venue provides Nothing" (red).
+The critical data condition is: **Does this request match my pricing structure and equipment requirements?** Entertainers need to immediately see if the venue's budget and equipment situation align with what they typically charge. Visual treatment: System compares request parameters (budget range, duration, equipment) to entertainer's stated pricing profile and shows a match indicator: "✓ Matches your 3-hour standard rate" (green) or "⚠ Budget below your typical range for this duration" (amber) or "❌ Equipment mismatch—you require Full PA, venue provides Nothing" (red).
 
 **Priority 2 — The context:**
 Request detail fields shown in priority order:
@@ -176,13 +180,13 @@ If request has `equipment_provided = "Unclear"` or missing `duration_hours`, sho
 ### Write Interactions
 **Primary write:** Venue creates and sends a request. Fields written: `status` (Draft → Sent), `budget_min`, `budget_max`, `duration_hours`, `equipment_provided`, `performance_details`, `event_date`, `event_type`, `sent_at` (timestamp). UI element: "Send Request" button on request creation form.
 
-**System response:** Request appears in venue's "Sent Requests" list with status badge showing "Sent" (amber color). Entertainer's inbox shows new request notification. Request Detail page for venue shows "Awaiting response" state with expected response time. If venue edits `duration_hours` in the form before sending, the budget suggestion text re-renders immediately.
+**System response:** Request appears in venue's "Sent Requests" list with status badge showing "Sent" (neutral square indicator). Entertainer's inbox shows new request notification. Request Detail page for venue shows "Awaiting response" state with expected response time. If venue edits `duration_hours` in the form before sending, the budget suggestion text re-renders immediately.
 
 **Validation & Constraints:** Required fields before sending: `event_date`, `duration_hours`, `event_type`, `performance_details` (min 20 characters). If `equipment_provided = "Unclear"`, show warning but allow send (don't block). Venue cannot send multiple requests to the same entertainer for the same event_date (duplicate prevention).
 
 **Secondary write:** Entertainer marks request as "Needs Clarification". Field written: `status` (Sent → In Discussion), adds a system note "Entertainer requested clarification on [timestamp]". UI element: "Request Clarification" button on Request Detail page.
 
-**System response:** Venue receives notification "Entertainer has questions about your request" and can view clarification message thread. Request status badge changes to "In Discussion" (blue color).
+**System response:** Venue receives notification "Entertainer has questions about your request" and can view clarification message thread. Request status badge changes to "In Discussion" (neutral square indicator).
 
 ### Read Interactions
 **Primary read:** Venue views entertainer profile and scans Pricing & Booking Details card.
@@ -195,7 +199,7 @@ If request has `equipment_provided = "Unclear"` or missing `duration_hours`, sho
 
 **Tertiary read:** Entertainer opens Request Detail page.
 
-**System response:** Full request detail renders with highlighted Budget & Requirements section at top. Match indicator appears showing alignment between request parameters and entertainer's pricing profile (green checkmark for good match, yellow warning for partial match, red flag for mismatch).
+**System response:** Full request detail renders with highlighted Budget & Requirements section at top. Match indicator appears showing alignment between request parameters and entertainer's pricing profile (green checkmark for good match, amber warning for partial match, red flag for mismatch).
 
 ## Secondary View
 What it adds: Allows venues to compare pricing across multiple entertainers they're considering for the same event, surfacing pricing differences in a side-by-side format that makes the "which one fits my budget" decision faster.
@@ -211,4 +215,29 @@ Build phase: Prompt 04
 
 ## Supporting Views
 
-No Supporting Views defined. All signals for Pricing Clarity point to the same question: "What does this price actually include?" The Primary View addresses this question completely for both venue and entertainer perspectives.
+### Pricing insights
+
+A supporting tab next to the default **Booking workspace** tab. It shares the Event type filter and reads the same in-memory requests, without refetching.
+
+- Priority 1: received request count, response rate, median response time, and percentage currently needing clarification in the last 90 days.
+- Priority 2: proposal acceptance grouped by clarity at the first proposal. Show accepted count, proposal count, and the rate for every clarity category, including zero-count categories. An empty denominator displays a dash.
+- Priority 3: stuck and overdue counts and a clear caption explaining the synthetic session clock. Show the accepted/proposal numerator and denominator beside rates for workshop learning.
+- Selecting Send Proposal on an active request records a proposal at the displayed budget, transitions to Proposal Sent, resets stage age, and freezes its clarity level. This workshop assumption avoids adding a quoting workflow.
+- Accept and Decline record events. Direct acceptance without a prior proposal does not enter proposal analytics. Undo restores request fields and events together.
+- Request review, clarification, proposal, and terminal actions immediately recompute insights.
+
+**Analytics KPI definitions:**
+- **Needs clarification:** Number of received requests currently needing clarification / number of received requests sent in the inclusive last 90 days.
+- **Proposal acceptance:** Number of requests with an accepted event after their first proposal_sent event / number of requests whose first proposal_sent event is in the inclusive last 90 days, grouped by clarity_level captured on that proposal; direct accepts and declines without a proposal are excluded.
+
+
+## Workshop decisions (resolved after the dry run)
+
+- All profile biographies, reviews, booking notes, and event histories are fictional fixtures. Initials avatars are the intentional workshop alternative to photographs; no missing-photo dependency remains.
+- “Response” means an explicit entertainer action (review, clarification, proposal, acceptance, or decline), never just navigating to a request. The first action sets the response timestamp once; later actions preserve it.
+- The app starts its demo clock at metadata.as_of and advances by session elapsed time. The inclusive 90-day cohort uses sent_at; drafts and future timestamps are excluded. Reload resets data and the clock.
+- Stuck: active status and days_in_stage strictly greater than metadata.thresholds.stuck_days_in_stage (14). Overdue: active, sent, unanswered request with response_due before the demo clock. New response deadlines are sent_at + metadata.thresholds.response_due_days (5).
+- Full PA System satisfies Basic Sound Only. The metadata capability map defines all equipment matching; Unclear is unknown, never an automatic mismatch.
+- Current clarity is Needs Clarification when equipment is Unclear, duration is missing/nonpositive, or review status is Needs Clarification; otherwise Clear. Proposal analytics freezes that classification at the first proposal.
+- All new and source requests satisfy the 20-character performance description minimum. Incomplete forms remain editable but cannot be sent.
+- After a write, existing details stay expanded and scroll position is retained. Keyboard focus returns to a relevant action; undo restores the data and event history.

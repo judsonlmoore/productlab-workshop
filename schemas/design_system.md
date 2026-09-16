@@ -42,6 +42,7 @@ These are the only colors permitted. No other colors may be introduced.
 | `--color-text-secondary` | `#666` | Secondary labels, breadcrumbs, icons |
 | `--color-text-muted` | `#999` | Meta text, section labels, chart axes |
 | `--color-signal-positive` | `#22C55E` | Positive delta values, good status indicators |
+| `--color-signal-warning` | `#F59E0B` | Warning text and decision diamonds; never container backgrounds |
 | `--color-signal-negative` | `#EF4444` | Negative delta values, warning status indicators |
 | `--color-accent` | `#FF6B35` | Brand accent, logo icon — use sparingly |
 | `--color-overlay` | `rgba(0,0,0,0.04)` | Hover state backgrounds |
@@ -72,18 +73,18 @@ body {
 
 ## Typography Scale
 
-Use only these size/weight combinations. Do not invent others.
+Use the size/weight combinations below. The 14px/400 body reset is a base fallback; components use the roles below. Icon glyph sizes are governed by the Icons section, not this text scale.
 
 | Role | Size | Weight | Color | Notes |
 |---|---|---|---|---|
 | Page / hero heading | 18px | 600 | `#1B1B1B` | Main title of the view |
 | Section heading | 15px | 600 | `#1B1B1B` | Chart title, table section heading |
 | KPI value / metric number | 20px | 600 | `#1B1B1B` | Large data readouts |
-| Navigation / body labels | 13px | 500 | `#1B1B1B` | Nav items, breadcrumb active state |
+| Navigation / body labels | 13px | 500–600 | `#1B1B1B` | Nav items, breadcrumb active state |
 | Body / data values | 13px | 400 | `#666` | Subtitles, secondary body copy |
-| Filter chips / small controls | 12px | 500 | `#1B1B1B` | Chips, tab buttons |
-| Meta / section labels | 12px | 500 | `#666` | KPI labels with icon |
-| Chart axis / legend text | 10–11px | 400 | `#999` | Axis labels, legend items |
+| Filter chips / small controls | 12px | 500–600 | `#1B1B1B` | Chips, tab buttons |
+| Meta / section labels | 12px | 400–500 | `#666` | KPI labels with icon |
+| Chart axis / legend text | 10–11px | 400–600 | `#999` | Axis labels, legend items |
 | Micro badge text | 9px | 600 | `#999` | Beta badges, count pills |
 
 ---
@@ -136,6 +137,8 @@ Borders communicate structure, not status. Use only the patterns below.
 Status is never communicated by borders on rows or cards. Use these patterns instead:
 
 ### Status Indicators
+
+Status labels use neutral squares unless a semantic outcome is known: positive green for accepted, warning amber for unresolved questions, critical red for mismatches/overdue. In Discussion does not require a blue token.
 
 Indicators are always inline with label text — same vertical rhythm, same line height.
 Size is fixed at 8×8px. Shape encodes semantic meaning. Color encodes state.
@@ -240,7 +243,7 @@ For categorical labels (stage, priority, source).
   color: #666;
   background: rgba(0,0,0,0.05);
   border-radius: 4px;
-  padding: 2px 6px;
+  padding: 4px;
 }
 ```
 
@@ -256,8 +259,8 @@ All badges use the same muted style. Color is NOT used to differentiate categori
 .filter-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
+  gap: 8px;
+  padding: 8px;
   background: #FFFFFF;
   border: 1px solid #D3D3D3;
   border-radius: 16px;
@@ -270,10 +273,10 @@ All badges use the same muted style. Color is NOT used to differentiate categori
 }
 .filter-chip:hover { border-color: #999; }
 .filter-chip .chip-chevron {
-  font-size: 14px;
+  font-size: 16px;
   color: #666;
   transition: transform 0.15s;
-  margin-left: 2px;
+  margin-left: 4px;
 }
 .filter-chip.open .chip-chevron {
   transform: rotate(180deg);
@@ -287,14 +290,14 @@ All badges use the same muted style. Color is NOT used to differentiate categori
   display: flex;
   background: #F0F0F0;
   border-radius: 6px;
-  padding: 3px;
-  gap: 2px;
+  padding: 4px;
+  gap: 4px;
 }
 .tab-group button {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 5px 8px;
+  padding: 8px;
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
@@ -327,7 +330,7 @@ All badges use the same muted style. Color is NOT used to differentiate categori
   position: relative;
 }
 .nav-item:hover { background: rgba(0,0,0,0.04); }
-.nav-item i { font-size: 17px; color: #666; width: 20px; height: 20px; }
+.nav-item i { font-size: 20px; color: #666; width: 20px; height: 20px; }
 .nav-item.active { font-weight: 600; }
 .nav-item.active::before {
   content: '';
@@ -346,7 +349,7 @@ All badges use the same muted style. Color is NOT used to differentiate categori
 ## Spacing and Layout
 
 Spacing follows a 4px base grid: `4, 8, 12, 16, 24, 32, 48`.
-Use values from this scale. Do not use values outside it (no 5px, 7px, 15px, 18px, 30px).
+Use these values for padding, gaps, and margins. Border widths, icon/indicator geometry, and the explicit desktop shell dimensions are exempt.
 
 ### Reference values
 
@@ -357,28 +360,23 @@ Use values from this scale. Do not use values outside it (no 5px, 7px, 15px, 18p
 | Section vertical padding | `16px` |
 | Filter bar padding | `8px 24px` |
 | KPI card padding | `12px 12px` |
-| Header height | `48px` |
+| Header height | `55px` |
 | Gap between filter chips | `8px` |
 | Gap between nav icon and label | `8px` |
 | Gap between legend items | `16px` |
 
-### Padding ratio rule
+### Component spacing rules
 
-When a component has different vertical and horizontal padding, the ratio must be
-between **0.9 and 1.0** (nearly square). Examples:
-- `8px 8px` = 1.0 ✓
-- `10px 12px` = 0.83 ✗ — too asymmetric
-- `12px 12px` = 1.0 ✓
-- `8px 10px` = 0.8 ✗ — too asymmetric
-
-This applies to all interactive components: buttons, chips, inputs, cards, badges.
-Layout containers (page regions, sidebar, header) are exempt — those follow the reference values above.
+Buttons, inputs, and chips use 8px or 12px padding. Compact badges use 4px.
+Rows and section containers may use asymmetric padding (for example 8px 24px)
+to align content with the page grid. There is no universal padding ratio requirement.
+Reference CSS may be adapted with these tokens to meet the View Spec.
 
 ---
 
 ## Icons
 
-Use **Iconoir** icons only. Icon size is 16–17px for inline use, 20px for nav items.
+Use **Iconoir** icons only. Icon size is 16–17px for inline use, 20px for nav items, and 32px for an empty-state illustration.
 Icon color follows text: `#1B1B1B` for primary context, `#666` for secondary, `#999` for muted.
 
 Icons are always decorative in this design system. They support labels; they do not replace them.
@@ -416,7 +414,7 @@ Use for structured data. No zebra striping. Structure through borders only.
 .table-row {
   display: flex;
   align-items: center;
-  padding: 10px 24px;
+  padding: 12px 24px;
   border-bottom: 1px solid #EFEFEF;
   cursor: pointer;
   transition: background 0.1s;
@@ -487,7 +485,7 @@ Columns are flat. Cards are white surfaces with subtle separation.
   color: #999;
   background: rgba(0,0,0,0.05);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 4px;
 }
 
 /* Card */
@@ -495,8 +493,8 @@ Columns are flat. Cards are white surfaces with subtle separation.
   background: #FFFFFF;
   border: 1px solid #EFEFEF;
   border-radius: 4px;
-  padding: 10px 10px;
-  margin-bottom: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: border-color 0.15s;
 }
@@ -517,7 +515,7 @@ Columns are flat. Cards are white surfaces with subtle separation.
   font-size: 11px;
   font-weight: 400;
   color: #999;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 ```
 
@@ -571,7 +569,7 @@ Threshold alerts in cards: use `.value-critical` (color: #EF4444, font-weight: 6
   background: #1B1B1B;
   border: none;
   border-radius: 4px;
-  padding: 10px 10px;
+  padding: 12px;
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -633,7 +631,7 @@ For item collections where each item has equal visual weight.
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 10px;
+  padding-top: 12px;
   border-top: 1px solid #EFEFEF;
 }
 .grid-card-meta {
@@ -667,7 +665,7 @@ For views with no data to display.
   font-size: 15px;
   font-weight: 600;
   color: #1B1B1B;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .empty-state-body {
   font-size: 13px;
@@ -686,11 +684,11 @@ For views with no data to display.
 | `border-left: Xpx solid [color]` on any data row or card | Status is communicated by typography and indicators, not container borders |
 | `background-color` on status rows/cards (e.g., red bg for overdue) | Too aggressive; use `.value-critical` on the value, not the container |
 | `box-shadow` values not defined in the Elevation Scale | Use Levels 0–4 only |
-| Any color not listed in the Color Tokens table | Breaks system coherence |
+| Any color not listed in the Color Tokens table or the explicit shadow/backdrop recipes | Breaks system coherence |
 | `font-size` or `font-weight` not in the Typography Scale | — |
 | Rounding corners on data rows or table containers | Flat containers only — use `border-radius: 4–6px` on cards only |
 | Gradient backgrounds | Not present in reference; do not introduce |
 | Opacity-based status coloring on containers | Not present in reference; do not introduce |
 | Zebra striping on table rows | Structure comes from borders, not alternating backgrounds |
-| `border-radius` larger than 6px on any component | Filter chips use 16px (pill) — that is the only exception |
-| Padding ratios below 0.9 on interactive components | See Padding ratio rule in Spacing section |
+| `border-radius` larger than 6px on any component | Filter chips use 16px (pill); the explicitly defined signal geometry (such as circular indicators) is also exempt |
+| Arbitrary component spacing | Use the Component spacing rules and documented geometry exceptions |

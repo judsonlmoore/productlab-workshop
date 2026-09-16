@@ -23,8 +23,8 @@ After the user completes a step, fill in the corresponding log file in `_simulat
 
 1. **Read the output** of the step that just ran (the file it produced).
 2. **Compare** it to what was expected based on the prompt's "After you run this" section.
-3. **Fill in** the log file using the template already in it. Do not change the template structure.
-4. **Append to `_simulation_log/issues.md`** any issue you find, with severity (High / Medium / Low) and root cause.
+3. **Fill in** the log file using the template already in it. Do not change the template structure. If the step file is missing, create it from `_simulation_log/TEMPLATE.md`; replace its step/date placeholders and status using actual observations. Preserve previous-run evidence and append repair results on reruns.
+4. **Append to `_simulation_log/issues.md`** any issue you find, with severity (High / Medium / Low) and root cause. Create the ledger if absent. Assign an issue ID and record resolution status, the concrete change, and validation evidence when repaired. Do not keep obsolete blockers in the current-open-issues list.
 
 ## What counts as an issue
 

@@ -1,0 +1,4013 @@
+{
+  "metadata": {
+    "entity": "Request",
+    "schema_version": "2.0",
+    "synthetic": true,
+    "as_of": "2026-09-16T12:00:00Z",
+    "currency": "EUR",
+    "sources": [
+      "_initial_context-gigiii/data_model.md",
+      "_context/feature_brief.md"
+    ],
+    "item_count": 32,
+    "stage_distribution": {
+      "Sent": 8,
+      "In Discussion": 4,
+      "Viewed": 4,
+      "Proposal Sent": 3,
+      "Expired": 3,
+      "Declined": 3,
+      "Accepted": 4,
+      "Draft": 3
+    },
+    "kpis": {
+      "response_rate": {
+        "label": "Response rate",
+        "definition": "Number of received requests with an explicit entertainer response / number of received requests, using sent_at in the inclusive last 90 days; drafts are excluded.",
+        "group_by": "entertainer_id",
+        "window_days": 90,
+        "cohort_field": "sent_at",
+        "window_start_inclusive": "2026-06-18T12:00:00Z",
+        "window_end_inclusive": "2026-09-16T12:00:00Z",
+        "aggregation": "count_responded / count_received",
+        "aggregation_fields": [
+          "sent_at",
+          "first_entertainer_action_at",
+          "first_entertainer_action_status"
+        ],
+        "unit": "ratio",
+        "empty_value": null,
+        "response_event_types": [
+          "reviewed",
+          "clarification_requested",
+          "proposal_sent",
+          "accepted",
+          "declined"
+        ],
+        "description": "Viewing a page is not a response. Mark Reviewed records the first action with Viewed status; clarification records In Discussion. Other response actions record an explicit review first if needed."
+      },
+      "average_response_time": {
+        "label": "Median response time",
+        "definition": "Median elapsed hours from sent_at to the first explicit entertainer response for received requests sent in the inclusive last 90 days; unanswered requests are excluded.",
+        "group_by": "entertainer_id",
+        "window_days": 90,
+        "cohort_field": "sent_at",
+        "window_start_inclusive": "2026-06-18T12:00:00Z",
+        "window_end_inclusive": "2026-09-16T12:00:00Z",
+        "aggregation": "median(first_entertainer_action_at - sent_at)",
+        "aggregation_fields": [
+          "sent_at",
+          "first_entertainer_action_at",
+          "first_entertainer_action_status"
+        ],
+        "unit": "hours",
+        "empty_value": null,
+        "response_event_types": [
+          "reviewed",
+          "clarification_requested",
+          "proposal_sent",
+          "accepted",
+          "declined"
+        ],
+        "description": "Viewing a page is not a response. Mark Reviewed records the first action with Viewed status; clarification records In Discussion. Other response actions record an explicit review first if needed."
+      },
+      "clarification_rate": {
+        "label": "Needs clarification",
+        "definition": "Number of received requests currently needing clarification / number of received requests sent in the inclusive last 90 days.",
+        "window_days": 90,
+        "cohort_field": "sent_at",
+        "aggregation_fields": [
+          "equipment_provided",
+          "duration_hours",
+          "pricing_review_status"
+        ],
+        "empty_value": null,
+        "unit": "ratio"
+      },
+      "proposal_acceptance_rate": {
+        "label": "Proposal acceptance",
+        "definition": "Number of requests with an accepted event after their first proposal_sent event / number of requests whose first proposal_sent event is in the inclusive last 90 days, grouped by clarity_level captured on that proposal; direct accepts and declines without a proposal are excluded.",
+        "window_days": 90,
+        "cohort_field": "events[type=proposal_sent].at",
+        "aggregation_fields": [
+          "events.type",
+          "events.at",
+          "events.clarity_level"
+        ],
+        "empty_value": null,
+        "unit": "ratio"
+      }
+    },
+    "filters": {
+      "specifications": [
+        {
+          "field": "event_type",
+          "label": "Event type",
+          "type": "enum",
+          "allowed_values": [
+            "Live Music",
+            "DJ Set",
+            "Comedy Show",
+            "Dance Performance",
+            "Theater",
+            "Variety Show"
+          ],
+          "default": null,
+          "scope": [
+            "profiles",
+            "requests",
+            "insights",
+            "compare"
+          ]
+        },
+        {
+          "field": "search",
+          "label": "Search entertainers",
+          "type": "text",
+          "allowed_values": null,
+          "default": "",
+          "scope": [
+            "profiles"
+          ]
+        }
+      ],
+      "note": "Event type is shared across views. Search applies only to the entertainer directory. Booking venue is context, not a data filter."
+    },
+    "allowed_values": {
+      "status": [
+        "Draft",
+        "Sent",
+        "Viewed",
+        "In Discussion",
+        "Proposal Sent",
+        "Accepted",
+        "Declined",
+        "Expired"
+      ],
+      "equipment_provided": [
+        "Full PA System",
+        "Basic Sound Only",
+        "Lighting Included",
+        "Nothing Provided",
+        "Unclear"
+      ],
+      "event_type": [
+        "Live Music",
+        "DJ Set",
+        "Comedy Show",
+        "Dance Performance",
+        "Theater",
+        "Variety Show"
+      ],
+      "venue_size": [
+        "Small (< 50)",
+        "Medium (50-150)",
+        "Large (150-500)",
+        "Very Large (500+)"
+      ],
+      "pricing_review_status": [
+        "Pending",
+        "Reviewed",
+        "Needs Clarification"
+      ],
+      "clarity_level": [
+        "Clear",
+        "Needs Clarification"
+      ],
+      "event_kind": [
+        "created",
+        "sent",
+        "reviewed",
+        "clarification_requested",
+        "proposal_sent",
+        "accepted",
+        "declined",
+        "expired"
+      ]
+    },
+    "defaults": {
+      "equipment_provided": "venue.equipment_provided or Unclear",
+      "duration_hours": "entertainer.pricing.typical_duration_hours",
+      "comparison": {
+        "duration_hours": 3,
+        "equipment_provided": "Basic Sound Only"
+      }
+    },
+    "thresholds": {
+      "equipment_warning": {
+        "field": "equipment_provided",
+        "equals": "Unclear",
+        "message": "Equipment details needed—clarify before booking."
+      },
+      "missing_request_details": {
+        "condition": "equipment_provided == Unclear OR duration_hours == null",
+        "message": "This request is missing key details. Use 'Request Clarification' to ask before responding."
+      },
+      "budget_below_range": {
+        "condition": "request.budget_max < entertainer.pricing.base_rate_min * request.duration_hours"
+      },
+      "equipment_mismatch": {
+        "condition": "Known venue equipment does not satisfy entertainer.pricing.equipment_required_from_venue"
+      },
+      "stuck_days_in_stage": 14,
+      "missing_profile_pricing": {
+        "condition": "entertainer.pricing == null OR any required base rate, equipment, or typical duration field is missing",
+        "message": "This entertainer hasn't added pricing details yet. Message them to discuss rates.",
+        "send_request_enabled": true,
+        "show_warning_icon": true
+      },
+      "response_due_days": 5,
+      "stuck_operator": ">",
+      "overdue_condition": "sent_at != null AND first_entertainer_action_at == null AND status is active AND response_due < runtime clock"
+    },
+    "validation": {
+      "required_before_send": [
+        "event_date",
+        "duration_hours",
+        "event_type",
+        "performance_details"
+      ],
+      "performance_details_min_length": 20,
+      "duplicate_key": [
+        "venue_id",
+        "entertainer_id",
+        "event_date"
+      ],
+      "equipment_unclear_blocks_send": false
+    },
+    "assumptions": [
+      "All records, event histories, profile bios, reviews, and booking notes are synthetic workshop examples.",
+      "The original sample identifiers, dates, names, budgets, and statuses are retained. Four short descriptions were expanded to satisfy the sending validation rule.",
+      "Profiles use intentional initials avatars; no external photos, real reviews, or external terms URLs are required.",
+      "Entertainer hourly prices and venue budgets remain separate; estimates round only for display.",
+      "An explicit review counts as a response. Merely opening a request does not. First-action fields mirror the first response event.",
+      "Stuck means active and days_in_stage > 14. Response overdue means no first response within five days of sending. Terminal requests do not trigger these alerts.",
+      "Full PA System satisfies Basic Sound Only. Unclear has unknown capabilities. Other capabilities are compared with the metadata map.",
+      "Send Proposal adopts the displayed venue budget for this workshop; no negotiation or dynamic quote engine is implied.",
+      "Proposal acceptance includes pending proposals in the denominator and excludes direct accepts/declines without a recorded proposal. Clarity is frozen at the first proposal.",
+      "Availability is unknown when the date is absent from the profile and no accepted request establishes a booking.",
+      "Data is fetched once; writes and undo remain in memory. Reload returns to the seed and restarts the anchored demo clock."
+    ],
+    "identifier_field": "request_id",
+    "lifecycle": {
+      "field": "status",
+      "stage_entered_field": "stage_entered_at",
+      "age_field": "days_in_stage",
+      "active_values": [
+        "Draft",
+        "Sent",
+        "Viewed",
+        "In Discussion",
+        "Proposal Sent"
+      ],
+      "terminal_values": [
+        "Accepted",
+        "Declined",
+        "Expired"
+      ]
+    },
+    "clock": {
+      "mode": "anchored",
+      "anchor_field": "as_of",
+      "description": "Start at as_of on page load and advance with elapsed session time. Reload resets the demo."
+    },
+    "equipment_capabilities": {
+      "Full PA System": [
+        "Full PA System",
+        "Basic Sound Only"
+      ],
+      "Basic Sound Only": [
+        "Basic Sound Only"
+      ],
+      "Lighting Included": [
+        "Lighting Included"
+      ],
+      "Nothing Provided": [],
+      "Unclear": null
+    },
+    "clarity": {
+      "definition": "Needs Clarification when equipment is Unclear, duration is missing/nonpositive, or pricing_review_status is Needs Clarification; otherwise Clear.",
+      "proposal_snapshot": "Freeze this value in clarity_level on the first proposal_sent event; subsequent clarification does not change historical grouping."
+    },
+    "profile_content": {
+      "avatar_kind": "initials",
+      "review_provenance": "Invented workshop examples, not real customer reviews.",
+      "photos_required": false
+    },
+    "ui": {
+      "product_name": "gigiii",
+      "feature_title": "Pricing Clarity",
+      "workspace_tab": "Booking workspace",
+      "insights_tab": "Pricing insights"
+    }
+  },
+  "items": [
+    {
+      "request_id": "REQ-001",
+      "venue_id": "VEN-001",
+      "entertainer_id": "ENT-001",
+      "venue_name": "Blue Note Jazz Bar",
+      "entertainer_name": "Sarah Mitchell Trio",
+      "event_date": "2026-10-15",
+      "event_type": "Live Music",
+      "status": "Sent",
+      "budget_min": 400.0,
+      "budget_max": 600.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Background jazz for dinner service",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-09-08T12:00:00Z",
+      "sent_at": "2026-09-08T14:00:00Z",
+      "last_activity": "2026-09-08T14:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-09-13T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-09-08T14:00:00Z",
+      "days_in_stage": 7,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-08T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-08T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-002",
+      "venue_id": "VEN-002",
+      "entertainer_id": "ENT-002",
+      "venue_name": "The Comedy Cellar",
+      "entertainer_name": "Marcus Weber",
+      "event_date": "2026-10-22",
+      "event_type": "Comedy Show",
+      "status": "In Discussion",
+      "budget_min": 300.0,
+      "budget_max": 500.0,
+      "duration_hours": 1.5,
+      "equipment_provided": "Basic Sound Only",
+      "performance_details": "Headline set, 18+ crowd",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-09-07T12:00:00Z",
+      "sent_at": "2026-09-07T14:00:00Z",
+      "last_activity": "2026-09-08T05:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-09-12T14:00:00Z",
+      "first_entertainer_action_at": "2026-09-07T17:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-09-08T05:00:00Z",
+      "days_in_stage": 8,
+      "pricing_review_status": "Needs Clarification",
+      "system_notes": [
+        {
+          "created_at": "2026-09-08T05:00:00Z",
+          "text": "Entertainer requested clarification on 2026-09-08T05:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-07T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-07T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-09-07T17:00:00Z"
+        },
+        {
+          "type": "clarification_requested",
+          "at": "2026-09-08T05:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-003",
+      "venue_id": "VEN-003",
+      "entertainer_id": "ENT-003",
+      "venue_name": "Riverside Brewery",
+      "entertainer_name": "DJ Alex Novak",
+      "event_date": "2026-10-08",
+      "event_type": "DJ Set",
+      "status": "Viewed",
+      "budget_min": 200.0,
+      "budget_max": 400.0,
+      "duration_hours": 4.0,
+      "equipment_provided": "Nothing Provided",
+      "performance_details": "Friday night dance party",
+      "load_in_time": "16:00 Europe/Berlin",
+      "created_at": "2026-09-06T12:00:00Z",
+      "sent_at": "2026-09-06T14:00:00Z",
+      "last_activity": "2026-09-07T06:00:00Z",
+      "venue_size": "Large (150-500)",
+      "response_due": "2026-09-11T14:00:00Z",
+      "first_entertainer_action_at": "2026-09-06T18:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-09-07T06:00:00Z",
+      "days_in_stage": 9,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-06T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-06T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-09-06T18:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-004",
+      "venue_id": "VEN-004",
+      "entertainer_id": "ENT-004",
+      "venue_name": "Grand Theater",
+      "entertainer_name": "Berlin Ballet Co.",
+      "event_date": "2026-11-12",
+      "event_type": "Dance Performance",
+      "status": "Proposal Sent",
+      "budget_min": 1500.0,
+      "budget_max": 2000.0,
+      "duration_hours": 2.0,
+      "equipment_provided": "Lighting Included",
+      "performance_details": "Featured performance, ticket sales",
+      "load_in_time": "17:00 Europe/Berlin",
+      "created_at": "2026-09-05T12:00:00Z",
+      "sent_at": "2026-09-05T14:00:00Z",
+      "last_activity": "2026-09-06T07:00:00Z",
+      "venue_size": "Very Large (500+)",
+      "response_due": "2026-09-10T14:00:00Z",
+      "first_entertainer_action_at": "2026-09-05T19:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-09-06T07:00:00Z",
+      "days_in_stage": 10,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-05T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-05T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-09-05T19:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-09-06T07:00:00Z",
+          "clarity_level": "Clear"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-005",
+      "venue_id": "VEN-005",
+      "entertainer_id": "ENT-005",
+      "venue_name": "Café Mozart",
+      "entertainer_name": "Piano Jane",
+      "event_date": "2026-10-18",
+      "event_type": "Live Music",
+      "status": "Expired",
+      "budget_min": 250.0,
+      "budget_max": 350.0,
+      "duration_hours": 2.0,
+      "equipment_provided": "Unclear",
+      "performance_details": "Afternoon classical music",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-09-04T12:00:00Z",
+      "sent_at": "2026-09-04T14:00:00Z",
+      "last_activity": "2026-09-09T14:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-09-09T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-09-09T14:00:00Z",
+      "days_in_stage": 6,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-04T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-04T14:00:00Z"
+        },
+        {
+          "type": "expired",
+          "at": "2026-09-09T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-006",
+      "venue_id": "VEN-006",
+      "entertainer_id": "ENT-006",
+      "venue_name": "Underground Club",
+      "entertainer_name": "The Rebels",
+      "event_date": "2026-10-30",
+      "event_type": "Live Music",
+      "status": "Declined",
+      "budget_min": 500.0,
+      "budget_max": 700.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Rock band, Halloween special",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-09-03T12:00:00Z",
+      "sent_at": "2026-09-03T14:00:00Z",
+      "last_activity": "2026-09-04T09:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-09-08T14:00:00Z",
+      "first_entertainer_action_at": "2026-09-03T21:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-09-04T09:00:00Z",
+      "days_in_stage": 12,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-03T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-03T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-09-03T21:00:00Z"
+        },
+        {
+          "type": "declined",
+          "at": "2026-09-04T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-007",
+      "venue_id": "VEN-007",
+      "entertainer_id": "ENT-007",
+      "venue_name": "Hotel Adlon Lounge",
+      "entertainer_name": "Smooth Jazz Quartet",
+      "event_date": "2026-11-05",
+      "event_type": "Live Music",
+      "status": "Accepted",
+      "budget_min": 800.0,
+      "budget_max": 1000.0,
+      "duration_hours": 4.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Corporate event entertainment",
+      "load_in_time": "16:00 Europe/Berlin",
+      "created_at": "2026-09-02T12:00:00Z",
+      "sent_at": "2026-09-02T14:00:00Z",
+      "last_activity": "2026-09-03T10:00:00Z",
+      "venue_size": "Large (150-500)",
+      "response_due": "2026-09-07T14:00:00Z",
+      "first_entertainer_action_at": "2026-09-02T22:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-09-03T10:00:00Z",
+      "days_in_stage": 13,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-02T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-02T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-09-02T22:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-09-03T04:00:00Z",
+          "clarity_level": "Clear"
+        },
+        {
+          "type": "accepted",
+          "at": "2026-09-03T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-008",
+      "venue_id": "VEN-008",
+      "entertainer_id": "ENT-008",
+      "venue_name": "Biergarten Mitte",
+      "entertainer_name": "DJ Fritz",
+      "event_date": "2026-10-12",
+      "event_type": "DJ Set",
+      "status": "Draft",
+      "budget_min": 150.0,
+      "budget_max": 300.0,
+      "duration_hours": 5.0,
+      "equipment_provided": "Basic Sound Only",
+      "performance_details": "Outdoor summer party",
+      "load_in_time": "17:00 Europe/Berlin",
+      "created_at": "2026-09-01T12:00:00Z",
+      "sent_at": null,
+      "last_activity": "2026-09-01T12:00:00Z",
+      "venue_size": "Very Large (500+)",
+      "response_due": null,
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-09-01T12:00:00Z",
+      "days_in_stage": 15,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-01T12:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-009",
+      "venue_id": "VEN-009",
+      "entertainer_id": "ENT-009",
+      "venue_name": "Artspace Gallery",
+      "entertainer_name": "Improv Theater Crew",
+      "event_date": "2026-10-25",
+      "event_type": "Theater",
+      "status": "Sent",
+      "budget_min": 400.0,
+      "budget_max": 600.0,
+      "duration_hours": 1.0,
+      "equipment_provided": "Nothing Provided",
+      "performance_details": "Art opening performance",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-08-31T12:00:00Z",
+      "sent_at": "2026-08-31T14:00:00Z",
+      "last_activity": "2026-08-31T14:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-09-05T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-31T14:00:00Z",
+      "days_in_stage": 15,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-31T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-31T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-010",
+      "venue_id": "VEN-010",
+      "entertainer_id": "ENT-010",
+      "venue_name": "Rooftop Bar Sky",
+      "entertainer_name": "Acoustic Duo",
+      "event_date": "2026-11-01",
+      "event_type": "Live Music",
+      "status": "Viewed",
+      "budget_min": 300.0,
+      "budget_max": 500.0,
+      "duration_hours": 2.5,
+      "equipment_provided": "Unclear",
+      "performance_details": "Acoustic sunset session for rooftop guests.",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-08-30T12:00:00Z",
+      "sent_at": "2026-08-30T14:00:00Z",
+      "last_activity": "2026-08-31T13:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-09-04T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-31T01:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-31T13:00:00Z",
+      "days_in_stage": 15,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-30T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-30T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-31T01:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-011",
+      "venue_id": "VEN-011",
+      "entertainer_id": "ENT-011",
+      "venue_name": "The Laugh Factory",
+      "entertainer_name": "Emma Chen",
+      "event_date": "2026-11-08",
+      "event_type": "Comedy Show",
+      "status": "In Discussion",
+      "budget_min": 350.0,
+      "budget_max": 450.0,
+      "duration_hours": 1.0,
+      "equipment_provided": "Basic Sound Only",
+      "performance_details": "Opening act, PG-13 content",
+      "load_in_time": "16:00 Europe/Berlin",
+      "created_at": "2026-08-29T12:00:00Z",
+      "sent_at": "2026-08-29T14:00:00Z",
+      "last_activity": "2026-08-30T14:00:00Z",
+      "venue_size": "Large (150-500)",
+      "response_due": "2026-09-03T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-30T02:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-30T14:00:00Z",
+      "days_in_stage": 16,
+      "pricing_review_status": "Needs Clarification",
+      "system_notes": [
+        {
+          "created_at": "2026-08-30T14:00:00Z",
+          "text": "Entertainer requested clarification on 2026-08-30T14:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-29T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-29T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-30T02:00:00Z"
+        },
+        {
+          "type": "clarification_requested",
+          "at": "2026-08-30T14:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-012",
+      "venue_id": "VEN-012",
+      "entertainer_id": "ENT-012",
+      "venue_name": "Tanzhaus Berlin",
+      "entertainer_name": "Contemporary Dance",
+      "event_date": "2026-11-20",
+      "event_type": "Dance Performance",
+      "status": "Sent",
+      "budget_min": 1200.0,
+      "budget_max": 1800.0,
+      "duration_hours": 1.5,
+      "equipment_provided": "Lighting Included",
+      "performance_details": "Guest choreographer showcase",
+      "load_in_time": "17:00 Europe/Berlin",
+      "created_at": "2026-08-28T12:00:00Z",
+      "sent_at": "2026-08-28T14:00:00Z",
+      "last_activity": "2026-08-28T14:00:00Z",
+      "venue_size": "Very Large (500+)",
+      "response_due": "2026-09-02T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-28T14:00:00Z",
+      "days_in_stage": 18,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-28T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-28T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-013",
+      "venue_id": "VEN-013",
+      "entertainer_id": "ENT-013",
+      "venue_name": "Pizzeria Napoli",
+      "entertainer_name": "Solo Guitarist",
+      "event_date": "2026-10-19",
+      "event_type": "Live Music",
+      "status": "Accepted",
+      "budget_min": 200.0,
+      "budget_max": 300.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Nothing Provided",
+      "performance_details": "Italian classics, dinner background",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-08-27T12:00:00Z",
+      "sent_at": "2026-08-27T14:00:00Z",
+      "last_activity": "2026-08-28T05:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-09-01T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-27T17:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-28T05:00:00Z",
+      "days_in_stage": 19,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-27T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-27T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-27T17:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-08-27T23:00:00Z",
+          "clarity_level": "Needs Clarification"
+        },
+        {
+          "type": "accepted",
+          "at": "2026-08-28T05:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-014",
+      "venue_id": "VEN-014",
+      "entertainer_id": "ENT-014",
+      "venue_name": "Wedding Venue Schloss",
+      "entertainer_name": "String Quartet",
+      "event_date": "2026-12-14",
+      "event_type": "Live Music",
+      "status": "Proposal Sent",
+      "budget_min": 600.0,
+      "budget_max": 800.0,
+      "duration_hours": 2.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Ceremony and cocktail hour",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-08-26T12:00:00Z",
+      "sent_at": "2026-08-26T14:00:00Z",
+      "last_activity": "2026-08-27T06:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-08-31T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-26T18:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-27T06:00:00Z",
+      "days_in_stage": 20,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-26T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-26T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-26T18:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-08-27T06:00:00Z",
+          "clarity_level": "Clear"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-015",
+      "venue_id": "VEN-015",
+      "entertainer_id": "ENT-015",
+      "venue_name": "Startup Hub",
+      "entertainer_name": "Magician Max",
+      "event_date": "2026-10-28",
+      "event_type": "Variety Show",
+      "status": "Expired",
+      "budget_min": 400.0,
+      "budget_max": 600.0,
+      "duration_hours": 0.5,
+      "equipment_provided": "Nothing Provided",
+      "performance_details": "Close-up magic for a team-building evening.",
+      "load_in_time": "16:00 Europe/Berlin",
+      "created_at": "2026-08-25T12:00:00Z",
+      "sent_at": "2026-08-25T14:00:00Z",
+      "last_activity": "2026-08-30T14:00:00Z",
+      "venue_size": "Large (150-500)",
+      "response_due": "2026-08-30T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-30T14:00:00Z",
+      "days_in_stage": 16,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-25T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-25T14:00:00Z"
+        },
+        {
+          "type": "expired",
+          "at": "2026-08-30T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-016",
+      "venue_id": "VEN-016",
+      "entertainer_id": "ENT-016",
+      "venue_name": "Irish Pub O'Malley",
+      "entertainer_name": "Folk Band",
+      "event_date": "2026-11-16",
+      "event_type": "Live Music",
+      "status": "Sent",
+      "budget_min": 350.0,
+      "budget_max": 500.0,
+      "duration_hours": 4.0,
+      "equipment_provided": "Basic Sound Only",
+      "performance_details": "St. Patrick's warm-up party",
+      "load_in_time": "17:00 Europe/Berlin",
+      "created_at": "2026-08-24T12:00:00Z",
+      "sent_at": "2026-08-24T14:00:00Z",
+      "last_activity": "2026-08-24T14:00:00Z",
+      "venue_size": "Very Large (500+)",
+      "response_due": "2026-08-29T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-24T14:00:00Z",
+      "days_in_stage": 22,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-24T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-24T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-017",
+      "venue_id": "VEN-017",
+      "entertainer_id": "ENT-017",
+      "venue_name": "Opera House",
+      "entertainer_name": "Soprano Vocalist",
+      "event_date": "2026-12-05",
+      "event_type": "Live Music",
+      "status": "In Discussion",
+      "budget_min": 2000.0,
+      "budget_max": 3000.0,
+      "duration_hours": 1.0,
+      "equipment_provided": "Lighting Included",
+      "performance_details": "Guest solo performance",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-08-23T12:00:00Z",
+      "sent_at": "2026-08-23T14:00:00Z",
+      "last_activity": "2026-08-24T09:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-08-28T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-23T21:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-24T09:00:00Z",
+      "days_in_stage": 23,
+      "pricing_review_status": "Needs Clarification",
+      "system_notes": [
+        {
+          "created_at": "2026-08-24T09:00:00Z",
+          "text": "Entertainer requested clarification on 2026-08-24T09:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-23T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-23T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-23T21:00:00Z"
+        },
+        {
+          "type": "clarification_requested",
+          "at": "2026-08-24T09:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-018",
+      "venue_id": "VEN-018",
+      "entertainer_id": "ENT-018",
+      "venue_name": "Beach Club",
+      "entertainer_name": "DJ Sunset",
+      "event_date": "2026-10-13",
+      "event_type": "DJ Set",
+      "status": "Declined",
+      "budget_min": 300.0,
+      "budget_max": 500.0,
+      "duration_hours": 6.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "All-day beach party with upbeat electronic music.",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-08-22T12:00:00Z",
+      "sent_at": "2026-08-22T14:00:00Z",
+      "last_activity": "2026-08-23T10:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-08-27T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-22T22:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-23T10:00:00Z",
+      "days_in_stage": 24,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-22T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-22T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-22T22:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-08-23T04:00:00Z",
+          "clarity_level": "Needs Clarification"
+        },
+        {
+          "type": "declined",
+          "at": "2026-08-23T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-019",
+      "venue_id": "VEN-019",
+      "entertainer_id": "ENT-019",
+      "venue_name": "Student Bar Campus",
+      "entertainer_name": "Open Mic Host",
+      "event_date": "2026-10-21",
+      "event_type": "Comedy Show",
+      "status": "Viewed",
+      "budget_min": 100.0,
+      "budget_max": 200.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Basic Sound Only",
+      "performance_details": "Weekly open mic night",
+      "load_in_time": "16:00 Europe/Berlin",
+      "created_at": "2026-08-21T12:00:00Z",
+      "sent_at": "2026-08-21T14:00:00Z",
+      "last_activity": "2026-08-22T11:00:00Z",
+      "venue_size": "Large (150-500)",
+      "response_due": "2026-08-26T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-21T23:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-22T11:00:00Z",
+      "days_in_stage": 25,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-21T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-21T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-21T23:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-020",
+      "venue_id": "VEN-020",
+      "entertainer_id": "ENT-020",
+      "venue_name": "Modern Art Museum",
+      "entertainer_name": "Dance Installation",
+      "event_date": "2026-11-28",
+      "event_type": "Dance Performance",
+      "status": "Sent",
+      "budget_min": 1000.0,
+      "budget_max": 1500.0,
+      "duration_hours": 2.0,
+      "equipment_provided": "Unclear",
+      "performance_details": "Interactive art performance",
+      "load_in_time": "17:00 Europe/Berlin",
+      "created_at": "2026-08-20T12:00:00Z",
+      "sent_at": "2026-08-20T14:00:00Z",
+      "last_activity": "2026-08-20T14:00:00Z",
+      "venue_size": "Very Large (500+)",
+      "response_due": "2026-08-25T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-20T14:00:00Z",
+      "days_in_stage": 26,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-20T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-20T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-021",
+      "venue_id": "VEN-021",
+      "entertainer_id": "ENT-021",
+      "venue_name": "Wine Bar Vineyard",
+      "entertainer_name": "Jazz Singer",
+      "event_date": "2026-10-26",
+      "event_type": "Live Music",
+      "status": "Draft",
+      "budget_min": 250.0,
+      "budget_max": 400.0,
+      "duration_hours": 2.0,
+      "equipment_provided": "Nothing Provided",
+      "performance_details": "Wine tasting evening music",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-08-19T12:00:00Z",
+      "sent_at": null,
+      "last_activity": "2026-08-19T12:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": null,
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-19T12:00:00Z",
+      "days_in_stage": 28,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-19T12:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-022",
+      "venue_id": "VEN-022",
+      "entertainer_id": "ENT-022",
+      "venue_name": "Corporate HQ",
+      "entertainer_name": "Keynote Speaker",
+      "event_date": "2026-11-10",
+      "event_type": "Variety Show",
+      "status": "Proposal Sent",
+      "budget_min": 800.0,
+      "budget_max": 1200.0,
+      "duration_hours": 1.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Annual conference entertainment",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-08-18T12:00:00Z",
+      "sent_at": "2026-08-18T14:00:00Z",
+      "last_activity": "2026-08-19T14:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-08-23T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-19T02:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-19T14:00:00Z",
+      "days_in_stage": 27,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-18T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-18T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-19T02:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-08-19T14:00:00Z",
+          "clarity_level": "Clear"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-023",
+      "venue_id": "VEN-023",
+      "entertainer_id": "ENT-023",
+      "venue_name": "Nightclub Pulse",
+      "entertainer_name": "Electronic DJ",
+      "event_date": "2026-10-31",
+      "event_type": "DJ Set",
+      "status": "Accepted",
+      "budget_min": 600.0,
+      "budget_max": 900.0,
+      "duration_hours": 5.0,
+      "equipment_provided": "Lighting Included",
+      "performance_details": "Halloween rave headliner",
+      "load_in_time": "16:00 Europe/Berlin",
+      "created_at": "2026-08-17T12:00:00Z",
+      "sent_at": "2026-08-17T14:00:00Z",
+      "last_activity": "2026-08-18T04:00:00Z",
+      "venue_size": "Large (150-500)",
+      "response_due": "2026-08-22T14:00:00Z",
+      "first_entertainer_action_at": "2026-08-17T16:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-18T04:00:00Z",
+      "days_in_stage": 29,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-17T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-17T14:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-17T16:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-08-17T22:00:00Z",
+          "clarity_level": "Clear"
+        },
+        {
+          "type": "accepted",
+          "at": "2026-08-18T04:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-024",
+      "venue_id": "VEN-024",
+      "entertainer_id": "ENT-024",
+      "venue_name": "Bookstore Kafka",
+      "entertainer_name": "Poetry Reader",
+      "event_date": "2026-11-03",
+      "event_type": "Theater",
+      "status": "Expired",
+      "budget_min": 150.0,
+      "budget_max": 250.0,
+      "duration_hours": 1.0,
+      "equipment_provided": "Nothing Provided",
+      "performance_details": "Poetry reading for a book launch and signing.",
+      "load_in_time": "17:00 Europe/Berlin",
+      "created_at": "2026-08-16T12:00:00Z",
+      "sent_at": "2026-08-16T14:00:00Z",
+      "last_activity": "2026-08-21T14:00:00Z",
+      "venue_size": "Very Large (500+)",
+      "response_due": "2026-08-21T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-21T14:00:00Z",
+      "days_in_stage": 25,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-16T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-16T14:00:00Z"
+        },
+        {
+          "type": "expired",
+          "at": "2026-08-21T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-025",
+      "venue_id": "VEN-025",
+      "entertainer_id": "ENT-025",
+      "venue_name": "Park Amphitheater",
+      "entertainer_name": "Cover Band",
+      "event_date": "2026-11-18",
+      "event_type": "Live Music",
+      "status": "Sent",
+      "budget_min": 700.0,
+      "budget_max": 1000.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Outdoor community festival",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-08-15T12:00:00Z",
+      "sent_at": "2026-08-15T14:00:00Z",
+      "last_activity": "2026-08-15T14:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-08-20T14:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-15T14:00:00Z",
+      "days_in_stage": 31,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-15T12:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-15T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-026",
+      "venue_id": "VEN-001",
+      "entertainer_id": "ENT-001",
+      "venue_name": "Blue Note Jazz Bar",
+      "entertainer_name": "Sarah Mitchell Trio",
+      "event_date": "2026-12-18",
+      "event_type": "Live Music",
+      "status": "Draft",
+      "budget_min": 400.0,
+      "budget_max": 600.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Background jazz for dinner service",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-09-16T06:00:00Z",
+      "sent_at": null,
+      "last_activity": "2026-09-16T06:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": null,
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-09-16T06:00:00Z",
+      "days_in_stage": 0,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-16T06:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-027",
+      "venue_id": "VEN-001",
+      "entertainer_id": "ENT-001",
+      "venue_name": "Blue Note Jazz Bar",
+      "entertainer_name": "Sarah Mitchell Trio",
+      "event_date": "2026-12-19",
+      "event_type": "Live Music",
+      "status": "Sent",
+      "budget_min": 100,
+      "budget_max": 200,
+      "duration_hours": 3.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Quiet jazz accompaniment during the winter tasting menu.",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-08-27T06:00:00Z",
+      "sent_at": "2026-08-27T07:00:00Z",
+      "last_activity": "2026-08-27T07:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-09-01T07:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-08-27T07:00:00Z",
+      "days_in_stage": 20,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-27T06:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-27T07:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-028",
+      "venue_id": "VEN-001",
+      "entertainer_id": "ENT-001",
+      "venue_name": "Blue Note Jazz Bar",
+      "entertainer_name": "Sarah Mitchell Trio",
+      "event_date": "2026-12-20",
+      "event_type": "Live Music",
+      "status": "Viewed",
+      "budget_min": 400.0,
+      "budget_max": 600.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Nothing Provided",
+      "performance_details": "Featured jazz trio in the courtyard; venue has no sound system.",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-09-13T06:00:00Z",
+      "sent_at": "2026-09-13T07:00:00Z",
+      "last_activity": "2026-09-13T11:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-09-18T07:00:00Z",
+      "first_entertainer_action_at": "2026-09-13T10:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-09-13T11:00:00Z",
+      "days_in_stage": 3,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-13T06:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-13T07:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-09-13T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-029",
+      "venue_id": "VEN-001",
+      "entertainer_id": "ENT-001",
+      "venue_name": "Blue Note Jazz Bar",
+      "entertainer_name": "Sarah Mitchell Trio",
+      "event_date": "2026-12-21",
+      "event_type": "Live Music",
+      "status": "In Discussion",
+      "budget_min": 400.0,
+      "budget_max": 600.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Unclear",
+      "performance_details": "Dinner jazz set; confirm whether the installed PA is operational.",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-08-29T06:00:00Z",
+      "sent_at": "2026-08-29T07:00:00Z",
+      "last_activity": "2026-08-29T11:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-09-03T07:00:00Z",
+      "first_entertainer_action_at": "2026-08-29T10:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-08-29T11:00:00Z",
+      "days_in_stage": 18,
+      "pricing_review_status": "Needs Clarification",
+      "system_notes": [
+        {
+          "created_at": "2026-08-29T11:00:00Z",
+          "text": "Entertainer requested clarification on 2026-08-29T11:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-08-29T06:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-08-29T07:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-08-29T10:00:00Z"
+        },
+        {
+          "type": "clarification_requested",
+          "at": "2026-08-29T11:00:00Z",
+          "fields": [
+            "equipment_provided"
+          ]
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-030",
+      "venue_id": "VEN-001",
+      "entertainer_id": "ENT-001",
+      "venue_name": "Blue Note Jazz Bar",
+      "entertainer_name": "Sarah Mitchell Trio",
+      "event_date": "2026-08-10",
+      "event_type": "Live Music",
+      "status": "Accepted",
+      "budget_min": 400.0,
+      "budget_max": 600.0,
+      "duration_hours": 3.0,
+      "equipment_provided": "Full PA System",
+      "performance_details": "Background jazz for dinner service",
+      "load_in_time": "14:00 Europe/Berlin",
+      "created_at": "2026-05-29T06:00:00Z",
+      "sent_at": "2026-05-29T07:00:00Z",
+      "last_activity": "2026-05-29T11:00:00Z",
+      "venue_size": "Small (< 50)",
+      "response_due": "2026-06-03T07:00:00Z",
+      "first_entertainer_action_at": "2026-05-29T10:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-05-29T11:00:00Z",
+      "days_in_stage": 110,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-05-29T06:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-05-29T07:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-05-29T10:00:00Z"
+        },
+        {
+          "type": "accepted",
+          "at": "2026-05-29T11:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-05-29T16:00:00Z",
+          "clarity_level": "Clear"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-031",
+      "venue_id": "VEN-002",
+      "entertainer_id": "ENT-002",
+      "venue_name": "The Comedy Cellar",
+      "entertainer_name": "Marcus Weber",
+      "event_date": "2026-12-22",
+      "event_type": "Comedy Show",
+      "status": "Declined",
+      "budget_min": 300.0,
+      "budget_max": 500.0,
+      "duration_hours": 1.5,
+      "equipment_provided": "Basic Sound Only",
+      "performance_details": "Headline set, 18+ crowd",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-09-07T06:00:00Z",
+      "sent_at": "2026-09-07T07:00:00Z",
+      "last_activity": "2026-09-07T11:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-09-12T07:00:00Z",
+      "first_entertainer_action_at": "2026-09-07T10:00:00Z",
+      "first_entertainer_action_status": "Viewed",
+      "stage_entered_at": "2026-09-07T11:00:00Z",
+      "days_in_stage": 9,
+      "pricing_review_status": "Reviewed",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-07T06:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-07T07:00:00Z"
+        },
+        {
+          "type": "reviewed",
+          "at": "2026-09-07T10:00:00Z"
+        },
+        {
+          "type": "declined",
+          "at": "2026-09-07T11:00:00Z"
+        },
+        {
+          "type": "proposal_sent",
+          "at": "2026-09-07T16:00:00Z",
+          "clarity_level": "Clear"
+        }
+      ]
+    },
+    {
+      "request_id": "REQ-032",
+      "venue_id": "VEN-002",
+      "entertainer_id": "ENT-002",
+      "venue_name": "The Comedy Cellar",
+      "entertainer_name": "Marcus Weber",
+      "event_date": "2026-12-23",
+      "event_type": "Comedy Show",
+      "status": "Sent",
+      "budget_min": 300.0,
+      "budget_max": 500.0,
+      "duration_hours": 1.5,
+      "equipment_provided": "Basic Sound Only",
+      "performance_details": "Headline set, 18+ crowd",
+      "load_in_time": "15:00 Europe/Berlin",
+      "created_at": "2026-09-15T06:00:00Z",
+      "sent_at": "2026-09-15T07:00:00Z",
+      "last_activity": "2026-09-15T07:00:00Z",
+      "venue_size": "Medium (50-150)",
+      "response_due": "2026-09-20T07:00:00Z",
+      "first_entertainer_action_at": null,
+      "first_entertainer_action_status": null,
+      "stage_entered_at": "2026-09-15T07:00:00Z",
+      "days_in_stage": 1,
+      "pricing_review_status": "Pending",
+      "system_notes": [],
+      "events": [
+        {
+          "type": "created",
+          "at": "2026-09-15T06:00:00Z"
+        },
+        {
+          "type": "sent",
+          "at": "2026-09-15T07:00:00Z"
+        }
+      ]
+    }
+  ],
+  "entertainers": [
+    {
+      "entertainer_id": "ENT-001",
+      "entertainer_name": "Sarah Mitchell Trio",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 133.33,
+        "base_rate_max": 200.0,
+        "typical_duration_hours": 3.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Full PA System"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 266.67,
+            "budget_max": 400.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 400.0,
+            "budget_max": 600.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 533.33,
+            "budget_max": 800.0,
+            "description": "4-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-15",
+          "status": "Available"
+        },
+        {
+          "event_date": "2026-12-18",
+          "status": "Available"
+        },
+        {
+          "event_date": "2026-12-19",
+          "status": "Available"
+        },
+        {
+          "event_date": "2026-12-20",
+          "status": "Available"
+        },
+        {
+          "event_date": "2026-12-21",
+          "status": "Available"
+        },
+        {
+          "event_date": "2026-08-10",
+          "status": "Booked"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "SM"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-001-1",
+          "author": "Lena Fischer",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-001-2",
+          "author": "Mara Schulz",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-002",
+      "entertainer_name": "Marcus Weber",
+      "event_types": [
+        "Comedy Show"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 200.0,
+        "base_rate_max": 333.33,
+        "typical_duration_hours": 1.5,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Basic Sound Only"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 200.0,
+            "budget_max": 333.33,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 1.5,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 300.0,
+            "budget_max": 500.0,
+            "description": "1.5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.5,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 500.0,
+            "budget_max": 833.33,
+            "description": "2.5-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-22",
+          "status": "Available"
+        },
+        {
+          "event_date": "2026-12-22",
+          "status": "Available"
+        },
+        {
+          "event_date": "2026-12-23",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "MW"
+      },
+      "bio": "Audience-aware comedy for clubs and private events. Content, running order, and microphone requirements are confirmed before show day.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-002-1",
+          "author": "Jonas Richter",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-002-2",
+          "author": "Felix Brandt",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-003",
+      "entertainer_name": "DJ Alex Novak",
+      "event_types": [
+        "DJ Set"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 50.0,
+        "base_rate_max": 100.0,
+        "typical_duration_hours": 4.0,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 150.0,
+            "budget_max": 300.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 200.0,
+            "budget_max": 400.0,
+            "description": "4-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 5.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 250.0,
+            "budget_max": 500.0,
+            "description": "5-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-08",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "DA"
+      },
+      "bio": "Dance-floor sets shaped around the room, from relaxed arrivals to a lively closing hour. Music preferences and sound checks are agreed in advance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-003-1",
+          "author": "Mara Schulz",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-003-2",
+          "author": "Nora Klein",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-004",
+      "entertainer_name": "Berlin Ballet Co.",
+      "event_types": [
+        "Dance Performance"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 750.0,
+        "base_rate_max": 1000.0,
+        "typical_duration_hours": 2.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Lighting Included"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 750.0,
+            "budget_max": 1000.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 1500.0,
+            "budget_max": 2000.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 2250.0,
+            "budget_max": 3000.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-12",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "BB"
+      },
+      "bio": "Choreographed performances for theaters, galleries, and event spaces. A safe floor and a clear setup window are part of every booking conversation.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-004-1",
+          "author": "Felix Brandt",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-004-2",
+          "author": "Lena Fischer",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-005",
+      "entertainer_name": "Piano Jane",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 125.0,
+        "base_rate_max": 175.0,
+        "typical_duration_hours": 2.0,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Unclear",
+            "budget_min": 125.0,
+            "budget_max": 175.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Unclear",
+            "budget_min": 250.0,
+            "budget_max": 350.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Unclear",
+            "budget_min": 375.0,
+            "budget_max": 525.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-18",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "PJ"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-005-1",
+          "author": "Nora Klein",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-005-2",
+          "author": "Jonas Richter",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-006",
+      "entertainer_name": "The Rebels",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 166.67,
+        "base_rate_max": 233.33,
+        "typical_duration_hours": 3.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Full PA System"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 333.33,
+            "budget_max": 466.67,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 500.0,
+            "budget_max": 700.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 666.67,
+            "budget_max": 933.33,
+            "description": "4-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-30",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "TR"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-006-1",
+          "author": "Lena Fischer",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-006-2",
+          "author": "Mara Schulz",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-007",
+      "entertainer_name": "Smooth Jazz Quartet",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 200.0,
+        "base_rate_max": 250.0,
+        "typical_duration_hours": 4.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Full PA System"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 600.0,
+            "budget_max": 750.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 800.0,
+            "budget_max": 1000.0,
+            "description": "4-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 5.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 1000.0,
+            "budget_max": 1250.0,
+            "description": "5-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-05",
+          "status": "Booked"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "SJ"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-007-1",
+          "author": "Jonas Richter",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-007-2",
+          "author": "Felix Brandt",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-008",
+      "entertainer_name": "DJ Fritz",
+      "event_types": [
+        "DJ Set"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 30.0,
+        "base_rate_max": 60.0,
+        "typical_duration_hours": 5.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Basic Sound Only"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 120.0,
+            "budget_max": 240.0,
+            "description": "4-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 5.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 150.0,
+            "budget_max": 300.0,
+            "description": "5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 6.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 180.0,
+            "budget_max": 360.0,
+            "description": "6-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-12",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "DF"
+      },
+      "bio": "Dance-floor sets shaped around the room, from relaxed arrivals to a lively closing hour. Music preferences and sound checks are agreed in advance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-008-1",
+          "author": "Mara Schulz",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-008-2",
+          "author": "Nora Klein",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-009",
+      "entertainer_name": "Improv Theater Crew",
+      "event_types": [
+        "Theater"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 400.0,
+        "base_rate_max": 600.0,
+        "typical_duration_hours": 1.0,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 400.0,
+            "budget_max": 600.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 800.0,
+            "budget_max": 1200.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-25",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "IT"
+      },
+      "bio": "Small-format theater and spoken performance for cultural venues. The program can be adapted to the audience and available performance space.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-009-1",
+          "author": "Felix Brandt",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-009-2",
+          "author": "Lena Fischer",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-010",
+      "entertainer_name": "Acoustic Duo",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 120.0,
+        "base_rate_max": 200.0,
+        "typical_duration_hours": 2.5,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1.5,
+            "equipment_provided": "Unclear",
+            "budget_min": 180.0,
+            "budget_max": 300.0,
+            "description": "1.5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.5,
+            "equipment_provided": "Unclear",
+            "budget_min": 300.0,
+            "budget_max": 500.0,
+            "description": "2.5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.5,
+            "equipment_provided": "Unclear",
+            "budget_min": 420.0,
+            "budget_max": 700.0,
+            "description": "3.5-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-01",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "AD"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-010-1",
+          "author": "Nora Klein",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-010-2",
+          "author": "Jonas Richter",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-011",
+      "entertainer_name": "Emma Chen",
+      "event_types": [
+        "Comedy Show"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 350.0,
+        "base_rate_max": 450.0,
+        "typical_duration_hours": 1.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Basic Sound Only"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 350.0,
+            "budget_max": 450.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 700.0,
+            "budget_max": 900.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-08",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "EC"
+      },
+      "bio": "Audience-aware comedy for clubs and private events. Content, running order, and microphone requirements are confirmed before show day.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-011-1",
+          "author": "Lena Fischer",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-011-2",
+          "author": "Mara Schulz",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-012",
+      "entertainer_name": "Contemporary Dance",
+      "event_types": [
+        "Dance Performance"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 800.0,
+        "base_rate_max": 1200.0,
+        "typical_duration_hours": 1.5,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Lighting Included"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 800.0,
+            "budget_max": 1200.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 1.5,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 1200.0,
+            "budget_max": 1800.0,
+            "description": "1.5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.5,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 2000.0,
+            "budget_max": 3000.0,
+            "description": "2.5-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-20",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "CD"
+      },
+      "bio": "Choreographed performances for theaters, galleries, and event spaces. A safe floor and a clear setup window are part of every booking conversation.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-012-1",
+          "author": "Jonas Richter",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-012-2",
+          "author": "Felix Brandt",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-013",
+      "entertainer_name": "Solo Guitarist",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 66.67,
+        "base_rate_max": 100.0,
+        "typical_duration_hours": 3.0,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 133.33,
+            "budget_max": 200.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 200.0,
+            "budget_max": 300.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 266.67,
+            "budget_max": 400.0,
+            "description": "4-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-19",
+          "status": "Booked"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "SG"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-013-1",
+          "author": "Mara Schulz",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-013-2",
+          "author": "Nora Klein",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-014",
+      "entertainer_name": "String Quartet",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 300.0,
+        "base_rate_max": 400.0,
+        "typical_duration_hours": 2.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Full PA System"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Full PA System",
+            "budget_min": 300.0,
+            "budget_max": 400.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 600.0,
+            "budget_max": 800.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 900.0,
+            "budget_max": 1200.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-12-14",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "SQ"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-014-1",
+          "author": "Felix Brandt",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-014-2",
+          "author": "Lena Fischer",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-015",
+      "entertainer_name": "Magician Max",
+      "event_types": [
+        "Variety Show"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 800.0,
+        "base_rate_max": 1200.0,
+        "typical_duration_hours": 0.5,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 0.5,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 400.0,
+            "budget_max": 600.0,
+            "description": "0.5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 800.0,
+            "budget_max": 1200.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 1.5,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 1200.0,
+            "budget_max": 1800.0,
+            "description": "1.5-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-28",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "MM"
+      },
+      "bio": "Engaging live entertainment for company gatherings and special occasions. The act is planned around the venue’s schedule and audience.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-015-1",
+          "author": "Nora Klein",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-015-2",
+          "author": "Jonas Richter",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-016",
+      "entertainer_name": "Folk Band",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 87.5,
+        "base_rate_max": 125.0,
+        "typical_duration_hours": 4.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Basic Sound Only"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 262.5,
+            "budget_max": 375.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 350.0,
+            "budget_max": 500.0,
+            "description": "4-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 5.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 437.5,
+            "budget_max": 625.0,
+            "description": "5-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-16",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "FB"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-016-1",
+          "author": "Lena Fischer",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-016-2",
+          "author": "Mara Schulz",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-017",
+      "entertainer_name": "Soprano Vocalist",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 2000.0,
+        "base_rate_max": 3000.0,
+        "typical_duration_hours": 1.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Lighting Included"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 2000.0,
+            "budget_max": 3000.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 4000.0,
+            "budget_max": 6000.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-12-05",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "SV"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-017-1",
+          "author": "Jonas Richter",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-017-2",
+          "author": "Felix Brandt",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-018",
+      "entertainer_name": "DJ Sunset",
+      "event_types": [
+        "DJ Set"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 50.0,
+        "base_rate_max": 83.33,
+        "typical_duration_hours": 6.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Full PA System"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 5.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 250.0,
+            "budget_max": 416.67,
+            "description": "5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 6.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 300.0,
+            "budget_max": 500.0,
+            "description": "6-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 7.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 350.0,
+            "budget_max": 583.33,
+            "description": "7-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-13",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "DS"
+      },
+      "bio": "Dance-floor sets shaped around the room, from relaxed arrivals to a lively closing hour. Music preferences and sound checks are agreed in advance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-018-1",
+          "author": "Mara Schulz",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-018-2",
+          "author": "Nora Klein",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-019",
+      "entertainer_name": "Open Mic Host",
+      "event_types": [
+        "Comedy Show"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 33.33,
+        "base_rate_max": 66.67,
+        "typical_duration_hours": 3.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Basic Sound Only"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 66.67,
+            "budget_max": 133.33,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 100.0,
+            "budget_max": 200.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Basic Sound Only",
+            "budget_min": 133.33,
+            "budget_max": 266.67,
+            "description": "4-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-21",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "OM"
+      },
+      "bio": "Audience-aware comedy for clubs and private events. Content, running order, and microphone requirements are confirmed before show day.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-019-1",
+          "author": "Felix Brandt",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-019-2",
+          "author": "Lena Fischer",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-020",
+      "entertainer_name": "Dance Installation",
+      "event_types": [
+        "Dance Performance"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 500.0,
+        "base_rate_max": 750.0,
+        "typical_duration_hours": 2.0,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Unclear",
+            "budget_min": 500.0,
+            "budget_max": 750.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Unclear",
+            "budget_min": 1000.0,
+            "budget_max": 1500.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Unclear",
+            "budget_min": 1500.0,
+            "budget_max": 2250.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-28",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "DI"
+      },
+      "bio": "Choreographed performances for theaters, galleries, and event spaces. A safe floor and a clear setup window are part of every booking conversation.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-020-1",
+          "author": "Nora Klein",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-020-2",
+          "author": "Jonas Richter",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-021",
+      "entertainer_name": "Jazz Singer",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": null,
+      "availability": [
+        {
+          "event_date": "2026-10-26",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "JS"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-021-1",
+          "author": "Lena Fischer",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-021-2",
+          "author": "Mara Schulz",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-022",
+      "entertainer_name": "Keynote Speaker",
+      "event_types": [
+        "Variety Show"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 800.0,
+        "base_rate_max": 1200.0,
+        "typical_duration_hours": 1.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Full PA System"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Full PA System",
+            "budget_min": 800.0,
+            "budget_max": 1200.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 1600.0,
+            "budget_max": 2400.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-10",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "KS"
+      },
+      "bio": "Engaging live entertainment for company gatherings and special occasions. The act is planned around the venue’s schedule and audience.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-022-1",
+          "author": "Jonas Richter",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-022-2",
+          "author": "Felix Brandt",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-023",
+      "entertainer_name": "Electronic DJ",
+      "event_types": [
+        "DJ Set"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 120.0,
+        "base_rate_max": 180.0,
+        "typical_duration_hours": 5.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Lighting Included"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 480.0,
+            "budget_max": 720.0,
+            "description": "4-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 5.0,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 600.0,
+            "budget_max": 900.0,
+            "description": "5-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 6.0,
+            "equipment_provided": "Lighting Included",
+            "budget_min": 720.0,
+            "budget_max": 1080.0,
+            "description": "6-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-10-31",
+          "status": "Booked"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "ED"
+      },
+      "bio": "Dance-floor sets shaped around the room, from relaxed arrivals to a lively closing hour. Music preferences and sound checks are agreed in advance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-023-1",
+          "author": "Mara Schulz",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-023-2",
+          "author": "Nora Klein",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-024",
+      "entertainer_name": "Poetry Reader",
+      "event_types": [
+        "Theater"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 150.0,
+        "base_rate_max": 250.0,
+        "typical_duration_hours": 1.0,
+        "equipment_included": [
+          "Portable PA system",
+          "Microphones and cables"
+        ],
+        "equipment_required_from_venue": [],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 1,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 150.0,
+            "budget_max": 250.0,
+            "description": "1-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Nothing Provided",
+            "budget_min": 300.0,
+            "budget_max": 500.0,
+            "description": "2-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-03",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "PR"
+      },
+      "bio": "Small-format theater and spoken performance for cultural venues. The program can be adapted to the audience and available performance space.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-024-1",
+          "author": "Felix Brandt",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-024-2",
+          "author": "Lena Fischer",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    },
+    {
+      "entertainer_id": "ENT-025",
+      "entertainer_name": "Cover Band",
+      "event_types": [
+        "Live Music"
+      ],
+      "pricing": {
+        "currency": "EUR",
+        "rate_basis": "per_hour",
+        "base_rate_min": 233.33,
+        "base_rate_max": 333.33,
+        "typical_duration_hours": 3.0,
+        "equipment_included": [
+          "Performance instruments and personal microphones"
+        ],
+        "equipment_required_from_venue": [
+          "Full PA System"
+        ],
+        "venue_requirements": [
+          "Safe performance space",
+          "Power outlet"
+        ],
+        "not_included": [
+          "Sound engineer",
+          "Stage construction"
+        ],
+        "setup_time_minutes": 60,
+        "setup_included": true,
+        "load_in_expectations": "Access to the performance area 60 minutes before the set.",
+        "example_scenarios": [
+          {
+            "duration_hours": 2.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 466.67,
+            "budget_max": 666.67,
+            "description": "2-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 3.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 700.0,
+            "budget_max": 1000.0,
+            "description": "3-hour performance with the standard equipment arrangement"
+          },
+          {
+            "duration_hours": 4.0,
+            "equipment_provided": "Full PA System",
+            "budget_min": 933.33,
+            "budget_max": 1333.33,
+            "description": "4-hour performance with the standard equipment arrangement"
+          }
+        ]
+      },
+      "availability": [
+        {
+          "event_date": "2026-11-18",
+          "status": "Available"
+        }
+      ],
+      "avatar": {
+        "kind": "initials",
+        "text": "CB"
+      },
+      "bio": "Warm, adaptable live sets for dinner service, receptions, and intimate stages. Set lists are agreed with the venue before the performance.",
+      "reviews": [
+        {
+          "review_id": "REVIEW-025-1",
+          "author": "Nora Klein",
+          "rating": 5,
+          "date": "2026-08-12",
+          "text": "Clear communication before the event and a performance that suited our audience."
+        },
+        {
+          "review_id": "REVIEW-025-2",
+          "author": "Jonas Richter",
+          "rating": 4,
+          "date": "2026-07-24",
+          "text": "Arrived on time, checked the setup with our team, and kept the evening running smoothly."
+        }
+      ],
+      "booking_notes": [
+        "Agree the final running order and equipment responsibilities before confirming.",
+        "The listed rate covers performance time and the setup described in this profile.",
+        "Confirm travel, overtime, and cancellation arrangements together before booking."
+      ]
+    }
+  ],
+  "venues": [
+    {
+      "venue_id": "VEN-001",
+      "venue_name": "Blue Note Jazz Bar",
+      "venue_size": "Small (< 50)",
+      "equipment_provided": "Full PA System",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-002",
+      "venue_name": "The Comedy Cellar",
+      "venue_size": "Medium (50-150)",
+      "equipment_provided": "Basic Sound Only",
+      "typical_event_types": [
+        "Comedy Show"
+      ]
+    },
+    {
+      "venue_id": "VEN-003",
+      "venue_name": "Riverside Brewery",
+      "venue_size": "Large (150-500)",
+      "equipment_provided": "Nothing Provided",
+      "typical_event_types": [
+        "DJ Set"
+      ]
+    },
+    {
+      "venue_id": "VEN-004",
+      "venue_name": "Grand Theater",
+      "venue_size": "Very Large (500+)",
+      "equipment_provided": "Lighting Included",
+      "typical_event_types": [
+        "Dance Performance"
+      ]
+    },
+    {
+      "venue_id": "VEN-005",
+      "venue_name": "Café Mozart",
+      "venue_size": "Small (< 50)",
+      "equipment_provided": "Unclear",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-006",
+      "venue_name": "Underground Club",
+      "venue_size": "Medium (50-150)",
+      "equipment_provided": "Full PA System",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-007",
+      "venue_name": "Hotel Adlon Lounge",
+      "venue_size": "Large (150-500)",
+      "equipment_provided": "Full PA System",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-008",
+      "venue_name": "Biergarten Mitte",
+      "venue_size": "Very Large (500+)",
+      "equipment_provided": "Basic Sound Only",
+      "typical_event_types": [
+        "DJ Set"
+      ]
+    },
+    {
+      "venue_id": "VEN-009",
+      "venue_name": "Artspace Gallery",
+      "venue_size": "Small (< 50)",
+      "equipment_provided": "Nothing Provided",
+      "typical_event_types": [
+        "Theater"
+      ]
+    },
+    {
+      "venue_id": "VEN-010",
+      "venue_name": "Rooftop Bar Sky",
+      "venue_size": "Medium (50-150)",
+      "equipment_provided": "Unclear",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-011",
+      "venue_name": "The Laugh Factory",
+      "venue_size": "Large (150-500)",
+      "equipment_provided": "Basic Sound Only",
+      "typical_event_types": [
+        "Comedy Show"
+      ]
+    },
+    {
+      "venue_id": "VEN-012",
+      "venue_name": "Tanzhaus Berlin",
+      "venue_size": "Very Large (500+)",
+      "equipment_provided": "Lighting Included",
+      "typical_event_types": [
+        "Dance Performance"
+      ]
+    },
+    {
+      "venue_id": "VEN-013",
+      "venue_name": "Pizzeria Napoli",
+      "venue_size": "Small (< 50)",
+      "equipment_provided": "Nothing Provided",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-014",
+      "venue_name": "Wedding Venue Schloss",
+      "venue_size": "Medium (50-150)",
+      "equipment_provided": "Full PA System",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-015",
+      "venue_name": "Startup Hub",
+      "venue_size": "Large (150-500)",
+      "equipment_provided": "Nothing Provided",
+      "typical_event_types": [
+        "Variety Show"
+      ]
+    },
+    {
+      "venue_id": "VEN-016",
+      "venue_name": "Irish Pub O'Malley",
+      "venue_size": "Very Large (500+)",
+      "equipment_provided": "Basic Sound Only",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-017",
+      "venue_name": "Opera House",
+      "venue_size": "Small (< 50)",
+      "equipment_provided": "Lighting Included",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-018",
+      "venue_name": "Beach Club",
+      "venue_size": "Medium (50-150)",
+      "equipment_provided": "Full PA System",
+      "typical_event_types": [
+        "DJ Set"
+      ]
+    },
+    {
+      "venue_id": "VEN-019",
+      "venue_name": "Student Bar Campus",
+      "venue_size": "Large (150-500)",
+      "equipment_provided": "Basic Sound Only",
+      "typical_event_types": [
+        "Comedy Show"
+      ]
+    },
+    {
+      "venue_id": "VEN-020",
+      "venue_name": "Modern Art Museum",
+      "venue_size": "Very Large (500+)",
+      "equipment_provided": "Unclear",
+      "typical_event_types": [
+        "Dance Performance"
+      ]
+    },
+    {
+      "venue_id": "VEN-021",
+      "venue_name": "Wine Bar Vineyard",
+      "venue_size": "Small (< 50)",
+      "equipment_provided": "Nothing Provided",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    },
+    {
+      "venue_id": "VEN-022",
+      "venue_name": "Corporate HQ",
+      "venue_size": "Medium (50-150)",
+      "equipment_provided": "Full PA System",
+      "typical_event_types": [
+        "Variety Show"
+      ]
+    },
+    {
+      "venue_id": "VEN-023",
+      "venue_name": "Nightclub Pulse",
+      "venue_size": "Large (150-500)",
+      "equipment_provided": "Lighting Included",
+      "typical_event_types": [
+        "DJ Set"
+      ]
+    },
+    {
+      "venue_id": "VEN-024",
+      "venue_name": "Bookstore Kafka",
+      "venue_size": "Very Large (500+)",
+      "equipment_provided": "Nothing Provided",
+      "typical_event_types": [
+        "Theater"
+      ]
+    },
+    {
+      "venue_id": "VEN-025",
+      "venue_name": "Park Amphitheater",
+      "venue_size": "Small (< 50)",
+      "equipment_provided": "Full PA System",
+      "typical_event_types": [
+        "Live Music"
+      ]
+    }
+  ]
+}

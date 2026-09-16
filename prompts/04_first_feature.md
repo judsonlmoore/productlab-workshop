@@ -76,8 +76,7 @@ Your engineering philosophy:
 a single line of CSS, you know exactly what the user needs to see, in what order,
 at what visual weight. The layout is a communication decision, not a technical one.
 
-**The viewport is the canvas.** All primary content fits without scrolling.
-If it doesn't fit, the hierarchy is wrong — not the viewport. Compress, reflow, reprioritize.
+**The viewport is the canvas.** At desktop sizes of at least 1024×768, fit the primary summary and action without scrolling. On phones, allow vertical reading, keep the main action reachable (sticky where useful), and prevent horizontal page overflow. Supporting disclosures may scroll at every size.
 
 **Think in grids, not stacks.** Dashboards are two-dimensional. A vertical list of boxes
 is not a dashboard. Use `display: grid` with explicit columns and rows.
@@ -122,13 +121,13 @@ From `## Supporting Views` (if present):
 - Use the tab labels from the Feature Brief. Use the tab group component from design_system.md.
 
 From `## Data Contract`:
-- **Required fields** — every field here must appear in the rendered output.
+- **Required fields** — display fields must appear in the relevant view; identifiers, foreign keys, and event timestamps support computation and need not clutter the summary. Read schemas/dataset_contract.md when present.
 - **Default State & Filters** — this is the starting state on first render.
 
 From `schemas/design_system.md`:
 - Read the full component library before building the HTML.
 - Match every UI element to its component type: table rows, filter chips, badges, KPI blocks, nav items, empty states.
-- Use the exact class names and CSS patterns from the design system. Do not invent new ones.
+- Reuse design system class names for visual components. Use semantic classes for view structure and adapt reference spacing as the design system permits. The token and typography tables are authoritative.
 
 Do not add anything not described in the Feature Brief.
 Do not omit anything that is.
@@ -182,7 +181,7 @@ Shell structure:
 
 Two sections in one file:
 
-**Section 1 — Shell layout (structure only):**
+**Section 1 — Shell layout (structure only; these are desktop dimensions, reflow on smaller screens):**
 - Global reset from design_system.md `## Global Reset and Base` — copy it exactly.
 - Sidebar: `position: fixed; left: 0; top: 0; bottom: 0; width: 220px`.
 - Header: `position: fixed; top: 0; left: 220px; right: 0; height: 55px`.
@@ -210,11 +209,14 @@ async function init() {
 
 function updateItem(identifier, field, value) {
   // In-memory data mutation (enables real Read & Write user testing without backend)
-  const item = state.data.items.find(i => (i.id || i.candidate_name || i.name) === identifier);
+  const idField = state.data.metadata.identifier_field;
+  const item = state.data.items.find(i => i[idField] === identifier);
   if (item) {
     item[field] = value;
-    if (field === 'stage') {
-      item.days_in_stage = 0; // Reset timer upon stage transition
+    if (field === state.data.metadata.lifecycle.field) {
+      item[state.data.metadata.lifecycle.age_field] = 0;
+      item[state.data.metadata.lifecycle.stage_entered_field] = currentDemoTime();
+      // Record the corresponding event when analytics require history.
     }
     render(); // Reactive update: re-computes all KPIs, distributions, and alerts
   }
@@ -239,10 +241,10 @@ Rules for `app.js`:
   2. If `days_in_stage` is affected by stage change, reset or update appropriately (e.g. moving stage resets `days_in_stage` to 0).
   3. Call `render()` to immediately recalculate and re-display all KPI cards, stage distributions, and stuck alerts.
   4. The user must see immediate, tangible feedback: the stuck count decreases, the stage funnel shifts, and the item's status indicator changes.
-- All labels, values, field names, categories: derived from JSON — `state.data.metadata` and `state.data.items`. No string literals for data.
+- All record values, categories, counts, and configurable labels come from JSON. Static interface copy (for example “Cancel”) and documented action identifiers may be literals. Do not hardcode computed values or record names.
 - All aggregate values (counts, averages, deltas): computed from `items` array using the KPI definitions in the Feature Brief. Do not hardcode computed values.
 - Every group or category that exists in the data must render, even if its count is zero.
-- Stuck/alert logic: implement the threshold from `state.data.metadata.stuck_candidates.threshold`. Do not hardcode `14`.
+- Stuck/alert logic: read named thresholds from `state.data.metadata.thresholds` and active/terminal values from `metadata.lifecycle`. Apply the specified comparison operator. Never copy entity-specific paths from another workshop example.
 - When a filter changes: update `state.filters`, call `render()`. All sections update simultaneously.
 
 ---
@@ -264,7 +266,7 @@ Then ask yourself: **Does this look like Linear?** If the answer is "it looks li
 ---
 
 Rules:
-- Do not modify the JSON data file.
+- Keep the JSON unchanged during a normal build. If a contract gap blocks a required behavior, document a workshop assumption and repair the brief, data contract, and dataset together before continuing. User-requested repair work explicitly permits these synchronized changes.
 - Do not use any CSS framework, JS library, or external dependency beyond Google Fonts and Iconoir (specified in design_system.md).
 - No inline styles. All CSS in `app.css`.
 - No SVG, no Canvas.
@@ -276,9 +278,9 @@ Rules:
 
 ## After you run this
 
-Open `src/index.html` in the browser. Check:
+Serve the repository root over local HTTP (for example `python3 -m http.server 8765 --bind 127.0.0.1`) and open `http://127.0.0.1:8765/src/index.html`. Fetching JSON from a file:// page is not the supported launch path. Check:
 
-1. **Viewport test** — Does all primary content fit without scrolling? If not, fix the grid.
+1. **Viewport test** — At 1024×768 or larger, do the primary summary and action fit? At 390×844, is the main action reachable, text readable, and horizontal page overflow absent? Supporting details may scroll.
 2. **Done Condition** — Perform the exact user scenario. Does it work without instructions?
 3. **KPI accuracy** — Are the numbers computed correctly per the KPI definitions?
 4. **Filters** — Do primary and secondary actions update all sections simultaneously?

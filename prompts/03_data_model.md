@@ -14,7 +14,7 @@ The AI reads your Feature Brief and your data model, then generates a realistic 
 
 | File | What it contains |
 |---|---|
-| `_initial_context/data_model.md` | Entity definitions, field types, sample rows |
+| `_initial_context-gigiii/data_model.md` | Entity definitions, field types, sample rows |
 | `_context/feature_brief.md` | Reviewed and approved Feature Brief |
 
 ---
@@ -23,7 +23,7 @@ The AI reads your Feature Brief and your data model, then generates a realistic 
 
 ```
 Read these two files:
-- _initial_context/data_model.md
+- _initial_context-gigiii/data_model.md
 - _context/feature_brief.md
 
 Generate a JSON dataset for the primary entity described in the Feature Brief.
@@ -40,7 +40,11 @@ The dataset must:
    - Stuck or blocked items (days_in_stage beyond threshold)
    - Terminal states (e.g. Hired, Rejected, Closed)
 5. Use realistic names, dates, and values — not "Test User 1" or placeholder strings.
-6. Use the sample rows from data_model.md as a starting point and expand them.
+6. Use the sample rows from data_model.md as a starting point and expand them. Correct sample values that violate the feature's validation rules; record the corrections rather than preserving known-invalid values.
+7. Read schemas/dataset_contract.md when present. Include linked profiles and an event history when views or KPIs need data beyond the primary entity.
+8. Put identifier_field, lifecycle fields, explicit filter specifications (an empty list is valid), and named thresholds in metadata. Never infer that every enum is a filter.
+9. Resolve missing workshop parameters with simple documented assumptions and align the brief, model, and metadata. Include a response definition, cohort timestamp, inclusive window boundaries, median/mean choice, and zero-denominator behavior for every KPI.
+10. Distinguish request statuses from actual proposal/response events. Do not derive event-based conversion rates from current status alone. Provide realistic synthetic supporting content, or specify an intentional supported fallback such as initials avatars.
 
 Save the result as: data/[entity-name-lowercase].json
 

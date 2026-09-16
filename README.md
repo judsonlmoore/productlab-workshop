@@ -100,3 +100,25 @@ The signals file is the hardest one. If you only have time for one, start there.
 ## Workshop Testing
 
 This workshop flow has been tested with Claude Code and the gstack `/ship` workflow.
+
+
+## Gigiii workshop demo
+
+The repaired Pricing Clarity app is in `src/`. From the repository root:
+
+```sh
+python3 -m http.server 8765 --bind 127.0.0.1
+```
+
+Open [the local app](http://127.0.0.1:8765/src/index.html). Use **Booking workspace**
+for profiles and request actions, and **Pricing insights** for the event-based metrics.
+The Event type filter is shared. Writes and undo are in memory; refresh resets the demo.
+
+Run the dependency-free regression checks with Node.js 18 or later:
+
+```sh
+node --test tests/workshop.test.cjs
+```
+
+See [the data contract](schemas/dataset_contract.md) for workshop assumptions and
+[the issue ledger](_simulation_log/issues.md) for the dry-run lessons and resolutions.

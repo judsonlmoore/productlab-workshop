@@ -14,7 +14,7 @@ Prompt 00 → Prompt 01 → Prompt 02 → Prompt 03 → Prompt 04
 
 ## After every step: log what happened
 
-After each pipeline step completes, read `.agent/skills/simulation-logger/SKILL.md` and fill in the corresponding log file in `_simulation_log/`.
+After each pipeline step completes, read `.agent/skills/simulation-logger/skill.md` and fill in the corresponding log file in `_simulation_log/`.
 
 | Step | Trigger | Log file |
 |---|---|---|
