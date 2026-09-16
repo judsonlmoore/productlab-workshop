@@ -1,0 +1,362 @@
+[
+  {
+    "raw_signal": "Some of my pics wouldn't upload.",
+    "quote_snippet": "Some of my pics wouldn't upload.",
+    "customer_size": "Entertainer",
+    "type": "problem",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Media Upload"
+  },
+  {
+    "raw_signal": "Sign up could be a little less detailed. Just get the essentials first and get it up and going and remind me to add later.",
+    "quote_snippet": "Just get the essentials first and get it up and going and remind me to add later.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Simplified Onboarding"
+  },
+  {
+    "raw_signal": "I have a date and I know I want something live, but I honestly don't know whether I should be looking for a DJ, a band or something else.",
+    "quote_snippet": "I honestly don't know whether I should be looking for a DJ, a band or something else.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Entertainment Guidance"
+  },
+  {
+    "raw_signal": "I don't want to fill out ten fields just to see who's available next Friday.",
+    "quote_snippet": "I don't want to fill out ten fields just to see who's available next Friday.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Quick Search"
+  },
+  {
+    "raw_signal": "Can you just show me people who are actually free on that date?",
+    "quote_snippet": "Can you just show me people who are actually free on that date?",
+    "customer_size": "Venue",
+    "type": "mention",
+    "severity": "High",
+    "category": "feature",
+    "bet": "Availability Filter"
+  },
+  {
+    "raw_signal": "I found someone I like, but I can't tell if €500 means one hour, the whole evening or just their minimum.",
+    "quote_snippet": "I can't tell if €500 means one hour, the whole evening or just their minimum.",
+    "customer_size": "Venue",
+    "type": "problem",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Pricing Clarity"
+  },
+  {
+    "raw_signal": "Does this price include their equipment or do I need to provide everything?",
+    "quote_snippet": "Does this price include their equipment or do I need to provide everything?",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Pricing Clarity"
+  },
+  {
+    "raw_signal": "I don't really know what technical questions I'm supposed to ask a band.",
+    "quote_snippet": "I don't really know what technical questions I'm supposed to ask a band.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Entertainment Guidance"
+  },
+  {
+    "raw_signal": "We do this every Thursday. I don't want to create the same event again every week.",
+    "quote_snippet": "I don't want to create the same event again every week.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Recurring Events"
+  },
+  {
+    "raw_signal": "I need somebody in two days. I don't have time to wait a week for people to apply.",
+    "quote_snippet": "I don't have time to wait a week for people to apply.",
+    "customer_size": "Venue",
+    "type": "problem",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Instant Booking"
+  },
+  {
+    "raw_signal": "I sent three requests but I have no idea if anyone has actually seen them.",
+    "quote_snippet": "I have no idea if anyone has actually seen them.",
+    "customer_size": "Venue",
+    "type": "problem",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Request Tracking"
+  },
+  {
+    "raw_signal": "If they don't answer by tomorrow I need to find somebody else.",
+    "quote_snippet": "If they don't answer by tomorrow I need to find somebody else.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Response Management"
+  },
+  {
+    "raw_signal": "I'd rather post what we need and let interested performers come to me.",
+    "quote_snippet": "I'd rather post what we need and let interested performers come to me.",
+    "customer_size": "Venue",
+    "type": "mention",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Reverse Marketplace"
+  },
+  {
+    "raw_signal": "There are only a few artists showing up. Is that really everyone available in Berlin?",
+    "quote_snippet": "Is that really everyone available in Berlin?",
+    "customer_size": "Venue",
+    "type": "problem",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Search Results"
+  },
+  {
+    "raw_signal": "I already found the musician somewhere else. Can I still manage the event here?",
+    "quote_snippet": "Can I still manage the event here?",
+    "customer_size": "Venue",
+    "type": "mention",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "External Booking Management"
+  },
+  {
+    "raw_signal": "We already have an event in our calendar. I just need entertainment for it.",
+    "quote_snippet": "We already have an event in our calendar.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Calendar Integration"
+  },
+  {
+    "raw_signal": "Why do I have Events and Bookings? Aren't my bookings just events?",
+    "quote_snippet": "Why do I have Events and Bookings?",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Information Architecture"
+  },
+  {
+    "raw_signal": "I just want to know what I have coming up this month and whether everything is sorted.",
+    "quote_snippet": "I just want to know what I have coming up this month and whether everything is sorted.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Dashboard Overview"
+  },
+  {
+    "raw_signal": "I need the invoice for accounting. I don't want to chase the artist for it afterward.",
+    "quote_snippet": "I don't want to chase the artist for it afterward.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Invoice Management"
+  },
+  {
+    "raw_signal": "Do I need to make a contract myself or does Gigiii handle that?",
+    "quote_snippet": "Do I need to make a contract myself or does Gigiii handle that?",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Contract Management"
+  },
+  {
+    "raw_signal": "What happens if the performer cancels the day before?",
+    "quote_snippet": "What happens if the performer cancels the day before?",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Cancellation Policy"
+  },
+  {
+    "raw_signal": "Can my colleague handle this booking too or does everything have to go through my account?",
+    "quote_snippet": "Can my colleague handle this booking too or does everything have to go through my account?",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Multi-user Access"
+  },
+  {
+    "raw_signal": "I don't want to enter my tax and business information before I've even received a booking.",
+    "quote_snippet": "I don't want to enter my tax and business information before I've even received a booking.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Simplified Onboarding"
+  },
+  {
+    "raw_signal": "Just let me make a profile first. I'll fill in the boring stuff when somebody actually wants to book me.",
+    "quote_snippet": "I'll fill in the boring stuff when somebody actually wants to book me.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Simplified Onboarding"
+  },
+  {
+    "raw_signal": "I have all of this on Instagram already. Why do I have to upload everything again?",
+    "quote_snippet": "Why do I have to upload everything again?",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Social Import"
+  },
+  {
+    "raw_signal": "Most of my good videos are on YouTube and Instagram. Can I just add those?",
+    "quote_snippet": "Can I just add those?",
+    "customer_size": "Entertainer",
+    "type": "mention",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Social Import"
+  },
+  {
+    "raw_signal": "I got a request but I can't tell whether they're asking for background music or a proper concert.",
+    "quote_snippet": "I can't tell whether they're asking for background music or a proper concert.",
+    "customer_size": "Entertainer",
+    "type": "problem",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Request Clarity"
+  },
+  {
+    "raw_signal": "The venue says their budget is €300–€700. That's such a big range that I don't know what they're expecting.",
+    "quote_snippet": "That's such a big range that I don't know what they're expecting.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Pricing Clarity"
+  },
+  {
+    "raw_signal": "Before I accept, I need to know whether there's a PA, what the load-in situation is and how long I'm actually playing.",
+    "quote_snippet": "I need to know whether there's a PA, what the load-in situation is and how long I'm actually playing.",
+    "customer_size": "Entertainer",
+    "type": "problem",
+    "severity": "High",
+    "category": "workflow",
+    "bet": "Technical Requirements"
+  },
+  {
+    "raw_signal": "I don't want to apply for gigs that are 50 kilometres away or don't pay enough.",
+    "quote_snippet": "I don't want to apply for gigs that are 50 kilometres away or don't pay enough.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Smart Filters"
+  },
+  {
+    "raw_signal": "If I'm already booked that evening, Gigiii shouldn't show me opportunities I can't take.",
+    "quote_snippet": "Gigiii shouldn't show me opportunities I can't take.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Availability Filter"
+  },
+  {
+    "raw_signal": "I accepted the offer. What am I waiting for now?",
+    "quote_snippet": "What am I waiting for now?",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Status Transparency"
+  },
+  {
+    "raw_signal": "Do I need to send them an invoice or does Gigiii create one for me?",
+    "quote_snippet": "Do I need to send them an invoice or does Gigiii create one for me?",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Invoice Management"
+  },
+  {
+    "raw_signal": "Most venues message me on Instagram. I need a good reason to move the conversation here.",
+    "quote_snippet": "I need a good reason to move the conversation here.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "High",
+    "category": "feature",
+    "bet": "Communication Value"
+  },
+  {
+    "raw_signal": "I don't want another calendar to maintain. It needs to work with the calendar I already use.",
+    "quote_snippet": "It needs to work with the calendar I already use.",
+    "customer_size": "Entertainer",
+    "type": "friction",
+    "severity": "High",
+    "category": "feature",
+    "bet": "Calendar Integration"
+  },
+  {
+    "raw_signal": "I'd like our upcoming events on our website without entering them again in another system.",
+    "quote_snippet": "I'd like our upcoming events on our website without entering them again in another system.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Website Integration"
+  },
+  {
+    "raw_signal": "We have a private company party. I need it on our schedule, but it absolutely shouldn't appear publicly.",
+    "quote_snippet": "It absolutely shouldn't appear publicly.",
+    "customer_size": "Venue",
+    "type": "problem",
+    "severity": "High",
+    "category": "feature",
+    "bet": "Private Events"
+  },
+  {
+    "raw_signal": "We know we want live music Saturday evenings, but I don't want to search through hundreds of profiles every week.",
+    "quote_snippet": "I don't want to search through hundreds of profiles every week.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "feature",
+    "bet": "Recurring Events"
+  },
+  {
+    "raw_signal": "This artist looks good, but there's not enough here for me to know whether they're professional and reliable.",
+    "quote_snippet": "There's not enough here for me to know whether they're professional and reliable.",
+    "customer_size": "Venue",
+    "type": "friction",
+    "severity": "Medium",
+    "category": "workflow",
+    "bet": "Artist Credibility"
+  },
+  {
+    "raw_signal": "Just tell me who fits my date, budget, venue and type of event.",
+    "quote_snippet": "Just tell me who fits my date, budget, venue and type of event.",
+    "customer_size": "Venue",
+    "type": "mention",
+    "severity": "High",
+    "category": "feature",
+    "bet": "Smart Matching"
+  }
+]

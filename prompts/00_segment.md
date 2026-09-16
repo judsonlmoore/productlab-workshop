@@ -12,7 +12,7 @@ Copy and paste the text below into your AI agent.
 ---
 
 ```
-Read the file _initial_context/signals.csv.
+Read the file _initial_context-lmp/signals.csv.
 
 For each row, classify the signal across five fields:
 
