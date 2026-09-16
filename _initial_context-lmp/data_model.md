@@ -12,7 +12,7 @@ No perfect schema needed — just what you know. The AI fills in the gaps.
 What is the central object in your product?
 *(Examples: Deal, Account, Order, Project, Ticket, User, Report)*
 
-**Entity:** [YOUR ENTITY NAME]
+**Entity:** Account
 
 ---
 

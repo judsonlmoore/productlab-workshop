@@ -19,9 +19,9 @@ Make sure these files exist and are filled in:
 
 | File | What it contains |
 |---|---|
-| `_initial_context/business_outcome.md` | What the business needs to achieve |
-| `_initial_context/product_outcome.md` | What user behavior needs to change |
-| `_initial_context/data_model.md` | Your product's entities and fields |
+| `_initial_context-gigiii/business_outcome.md` | What the business needs to achieve |
+| `_initial_context-gigiii/product_outcome.md` | What user behavior needs to change |
+| `_initial_context-gigiii/data_model.md` | Your product's entities and fields |
 | `_context/bets.json` | Ranked bets from `score.py` |
 | `_context/signals_segmented.json` | Segmented signals from Prompt 00 |
 
@@ -33,9 +33,9 @@ If `_context/bets.json` is missing, run `python3 bet_ranker/score.py` first.
 
 ```
 Read the following files:
-- _initial_context/business_outcome.md
-- _initial_context/product_outcome.md
-- _initial_context/data_model.md
+- _initial_context-gigiii/business_outcome.md
+- _initial_context-gigiii/product_outcome.md
+- _initial_context-gigiii/data_model.md
 - _context/bets.json
 - _context/signals_segmented.json
 
@@ -130,7 +130,7 @@ After: [What the user does next — derived from product_outcome.md. If the user
 
 ## Data Contract
 Entity: [The primary entity from data_model.md this feature targets]
-Source: _initial_context/data_model.md
+Source: _initial_context-gigiii/data_model.md
 Required fields: [All fields the user needs to see in this view to make a decision without leaving the screen or asking someone else. Include status, temporal, and contextual fields — not just identifiers. Minimum 6 fields.]
 Default State & Filters: [What data is loaded initially? Explicitly define the default filters and sorting. Do not load 'everything' by default if cognitive load is an issue.]
 

@@ -94,3 +94,9 @@ Add min 20, up to 100 real rows at the bottom. Use real values, not "example" or
 Reply to the workshop email. I will help you figure it out.
 
 The signals file is the hardest one. If you only have time for one, start there.
+
+---
+
+## Workshop Testing
+
+This workshop flow has been tested with Claude Code and the gstack `/ship` workflow.
